@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Paneli</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+<div class="container mt-5 text-center">
+  <h2>Sistem Yönetici Paneli</h2>
+  <hr class="border-light">
+
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+      <div class="card bg-success text-white shadow-lg">
+        <div class="card-body py-5">
+          <h4 class="card-title">Sistem Kasası (Toplam Komisyon)</h4>
+          <h1 class="display-3 fw-bold mt-3" th:text="${totalCommission} + ' ₺'">0.0 ₺</h1>
+          <p class="mt-2">Platform üzerinden yapılan tüm satışlardan kesilen %10'luk gelirler.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <a th:href="@{/items}" class="btn btn-outline-light">Envantere Geri Dön</a>
+  </div>
+</div>
+</body>
+</html>
