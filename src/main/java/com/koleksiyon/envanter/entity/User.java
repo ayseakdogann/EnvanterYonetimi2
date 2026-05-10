@@ -11,16 +11,15 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Getter // @Data yerine tek tek eklendi
+@Getter
 @Setter
 @NoArgsConstructor
-// ÖNEMLİ: hashCode ve equals metotlarında sadece ID'yi kullan, koleksiyonları dahil etme!
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // sadece id üzerinden karşılaştırma yapılarak sonsuz döngüler engelendi
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include // Sadece bu alan baz alınacak
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -51,4 +50,7 @@ public class User {
 
     @ManyToMany(mappedBy = "following", fetch = FetchType.LAZY)
     private Set<User> followers = new HashSet<>();
+
+    // Kullanıcının sistemdeki parası
+    private Double balance = 0.0;
 }

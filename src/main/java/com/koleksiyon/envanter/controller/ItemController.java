@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +27,7 @@ public class ItemController {
 
     private final ItemService itemService;
     private final UserService userService;
-    private final ItemRepository itemRepository; // Hataları önlemek için doğrudan repository eklendi
+    private final ItemRepository itemRepository;
 
     // Giriş yapmış kullanıcıyı getiren yardımcı metot
     private User getLoggedInUser() {
@@ -34,7 +35,7 @@ public class ItemController {
         return userService.findByUsername(auth.getName());
     }
 
-    // 1. ANA SAYFA: Sadece satışta olan ürünleri filtreli gösterir
+    // Sadece satışta olan ürünleri filtreli gösterir
     @GetMapping
     public String listItems(
             @RequestParam(value = "search", required = false) String search,
@@ -47,7 +48,6 @@ public class ItemController {
         if (search != null && !search.isEmpty()) {
             items = itemRepository.findByNameContainingIgnoreCase(search);
         } else {
-            // Servis üzerinden filtreli satış listesini getirir
             items = itemService.getItemsForSale(sort, category);
         }
 
@@ -56,16 +56,23 @@ public class ItemController {
         return "index";
     }
 
-    // 2. ÜRÜN EKLEME FORMU
+    // ürün ekleme formu
     @GetMapping("/add")
     public String showAddForm(Model model) {
+        if (getLoggedInUser().getRole().equals("ROLE_ADMIN")) {
+            return "redirect:/items?error=admin_cannot_add";
+        }
         model.addAttribute("itemDTO", new ItemDTO());
         return "item-form";
     }
 
-    // 3. KOLEKSİYONA KAYDETME (Satışta Değil Olarak Başlar)
+    // koleksiyona kaydetme
+    @Transactional
     @PostMapping("/save")
     public String saveItem(@ModelAttribute("itemDTO") ItemDTO itemDTO) throws IOException {
+        if (getLoggedInUser().getRole().equals("ROLE_ADMIN")) {
+            return "redirect:/items?error=admin_cannot_add";
+        }
         Item item = new Item();
         item.setName(itemDTO.getName());
         item.setType(itemDTO.getType());
@@ -73,15 +80,15 @@ public class ItemController {
         item.setStartingPrice(itemDTO.getStartingPrice());
 
         item.setOwner(getLoggedInUser());
-        item.setForSale(false); // Önce sadece koleksiyona eklenir
+        item.setForSale(false);
 
         itemService.saveItem(item, itemDTO.getImageFile());
         return "redirect:/my-collection";
     }
 
-    // 4. ÜRÜNÜ SATIŞA ÇIKARMA
+    // ürünü satışa çıkarma
     @PostMapping("/list-for-sale/{id}")
-    @Transactional // Veritabanı oturumunun açık kalmasını sağlar
+    @Transactional
     public String listForSale(@PathVariable Long id) {
         Item item = itemService.getItemById(id);
         User currentUser = getLoggedInUser();
@@ -93,7 +100,7 @@ public class ItemController {
         return "redirect:/items";
     }
 
-    // 5. ÜRÜN DETAY SAYFASI
+    // ürün detay sayfası
     @GetMapping("/{id}")
     public String showItemDetails(@PathVariable Long id, Model model) {
         Item item = itemService.getItemById(id);
@@ -102,16 +109,21 @@ public class ItemController {
         return "item-details";
     }
 
-    // 6. TEKLİF VERME
+    // teklif verme
+    @Transactional
     @PostMapping("/bid/{id}")
-    public String placeBid(@PathVariable Long id, @RequestParam("amount") Double amount) {
-        itemService.placeBid(id, amount, getLoggedInUser());
+    public String placeBid(@PathVariable Long id, @RequestParam("amount") Double amount, RedirectAttributes redirectAttributes) {
+        try {
+            itemService.placeBid(id, amount, getLoggedInUser());
+            redirectAttributes.addFlashAttribute("successMessage", "Teklifiniz başarıyla verildi!");
+        } catch (IllegalArgumentException e) {
+            // Servis katmanından gelen "Teklifiniz yetersiz" mesajını yakalayıp sayfaya gönderir
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/items/" + id;
     }
 
-    // 7. SİLME (Admin veya Sahibi silebilir)
-    // 7. SİLME (Admin veya Sahibi silebilir)
-    // Sınıf başında /items olduğu için buraya sadece /delete/{id} yazıyoruz.
+    // ürünü silme
     @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     @Transactional
     public String deleteItem(@PathVariable Long id) {
@@ -134,7 +146,8 @@ public class ItemController {
 
         return "redirect:/items?error=unauthorized";
     }
-    // 8. RESİM GETİRME
+
+    // resim getirme
     @GetMapping("/image/{id}")
     @ResponseBody
     public ResponseEntity<byte[]> getItemImage(@PathVariable Long id) {
@@ -145,5 +158,15 @@ public class ItemController {
         return ResponseEntity.notFound().build();
     }
 
-
+    // Satışı Onaylama ve Parayı Hesaba Aktarma
+    @PostMapping("/close-auction/{id}")
+    public String closeAuction(@PathVariable Long id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            itemService.closeAuction(id, getLoggedInUser().getUsername());
+            redirectAttributes.addFlashAttribute("successMessage", "Satış tamamlandı! Komisyon kesildikten sonra kalan tutar cüzdanınıza eklendi.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/items/" + id;
+    }
 }

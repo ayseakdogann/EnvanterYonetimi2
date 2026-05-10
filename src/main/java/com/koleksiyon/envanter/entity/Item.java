@@ -31,24 +31,17 @@ public class Item {
     @Column(name = "image")
     private byte[] image;
 
-    // --- YENİ EKLENEN AÇIK ARTIRMA BİLGİLERİ ---
-
     private Double startingPrice; // Başlangıç Fiyatı
 
     private Double currentHighestBid; // Şu anki en yüksek teklif
 
     private boolean isSold = false; // Ürün satıldı mı?
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) // her ürün bir kullanıcıya bağlı
     @JoinColumn(name = "owner_id")
     private User owner; // Ürünü satışa koyan kişi (Sahibi)
 
-
-
-
-    // KOLEKSİYON VE SATIŞ DURUMU
     private boolean forSale = false; // Varsayılan olarak ürün sadece koleksiyondadır, satılık değildir.
 
-    // FİLTRELEME İÇİN EKLENME TARİHİ
-    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now(); // eklenme tarihi
 }

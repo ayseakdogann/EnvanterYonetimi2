@@ -10,11 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import java.util.Collections;
-
-import java.util.ArrayList;
-import com.koleksiyon.envanter.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -25,7 +20,7 @@ public class UserService implements UserDetailsService {
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    // 1. Spring Security'nin giriş yaparken kullanıcıyı veritabanında bulması için gereken zorunlu metot
+    // Spring Security'nin giriş yaparken kullanıcıyı veritabanında bulması için gereken zorunlu metot
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
@@ -38,18 +33,19 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 
-    // 2. Yeni kullanıcı sisteme kayıt olurken (Register) çalışacak metot
+    // Yeni kullanıcı sisteme kayıt olurken (Register) çalışacak metot
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole("ROLE_USER"); // Dışarıdan kaydolan herkes normal kullanıcıdır
         userRepository.save(user);
     }
 
-    // 3. Kullanıcı adı ile kendi User nesnemizi bulmak için yardımcı metot
+    // Kullanıcı adı ile kendi User nesnemizi bulmak için yardımcı metot
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
-    // 4. Sistem başladığında otomatik admin oluşturma
+
+    // Sistem başladığında otomatik admin oluşturma
     @PostConstruct
     public void initAdmin() {
         if (userRepository.findByUsername("admin").isEmpty()) {
@@ -60,12 +56,13 @@ public class UserService implements UserDetailsService {
             userRepository.save(admin);
         }
     }
+
     @Transactional
     public void updateUser(User user) {
         userRepository.save(user);
     }
+
     public java.util.List<User> getAllUsers() {
         return userRepository.findAll();
     }
-
 }

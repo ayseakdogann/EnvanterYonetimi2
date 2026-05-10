@@ -134,11 +134,20 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-2"><a class="nav-link text-light" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a></li>
-                <li class="nav-item me-3"><a class="nav-link" style="color: #ff8c00 !important; font-weight: bold;" th:href="@{/my-collection}"><i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum</a></li>
+                <li class="nav-item me-3" th:if="${currentUser.role != 'ROLE_ADMIN'}">
+                    <a class="nav-link" style="color: #ff8c00 !important; font-weight: bold;" th:href="@{/my-collection}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum
+                    </a>
+                </li>
 
-                <li class="nav-item me-3" th:if="${currentUser != null}">
+                <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role != 'ROLE_ADMIN'}">
                     <a th:href="@{'/profile/' + ${currentUser.username}}" class="nav-link profile-btn px-3" style="color: #ff8c00; border: 1px solid rgba(255,140,0,0.3); border-radius: 15px;">
                         <i class="bi bi-person-circle"></i> <span th:text="${currentUser.username}"></span>
+                    </a>
+                </li>
+                <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role == 'ROLE_ADMIN'}">
+                    <a class="btn btn-warning btn-sm rounded-pill px-4" th:href="@{/admin/dashboard}" style="font-weight: bold;">
+                        <i class="bi bi-safe2-fill"></i> Sistem Kasası
                     </a>
                 </li>
                 <li class="nav-item"><a class="btn btn-danger btn-sm rounded-pill px-4" th:href="@{'/login?logout'}">Çıkış</a></li>
@@ -181,7 +190,11 @@
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-2">
                 <h3 class="fw-bold m-0" style="color: #ff8c00;">Pazar Yeri</h3>
-                <a th:href="@{/items/add}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg"></i> Koleksiyona Ekle</a>
+                <a th:if="${currentUser.role != 'ROLE_ADMIN'}"
+                   th:href="@{/items/add}"
+                   class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-plus-lg"></i> Koleksiyona Ekle
+                </a>
             </div>
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">

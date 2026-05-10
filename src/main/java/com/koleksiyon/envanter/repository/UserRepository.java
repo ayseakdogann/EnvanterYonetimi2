@@ -8,8 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
-    // Bir önceki hatayı (LazyInitialization) çözmek için burayı eklemeyi unutma:
     @EntityGraph(attributePaths = {"followers", "following"})
     Optional<User> findByUsername(String username);
 }

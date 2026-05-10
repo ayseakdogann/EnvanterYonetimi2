@@ -226,7 +226,7 @@
                 <p class="bio-text mt-2" th:text="${user.bio != null ? user.bio : 'Henüz bir biyografi eklenmemiş.'}"></p>
 
                 <!-- Tıklanabilir hale getirilen istatistik bölümü -->
-                <div class="d-flex gap-3 mt-4">
+                <div class="d-flex gap-3 mt-4 flex-wrap">
                     <a th:href="@{'/profile/' + ${user.username} + '/followers'}" class="stat-link">
                         <div class="stat-badge">
                             <strong th:text="${user.followers.size()}">0</strong> Takipçi
@@ -237,6 +237,14 @@
                             <strong th:text="${user.following.size()}">0</strong> Takip
                         </div>
                     </a>
+
+                    <div th:if="${currentUser.id == user.id}" class="stat-badge" style="border-color: #28a745; background: rgba(40, 167, 69, 0.1); cursor: default;">
+                        <strong style="color: #28a745;"
+                                th:text="${#numbers.formatDecimal(user.balance != null ? user.balance : 0, 1, 2)} + ' ₺'">
+                            0.00 ₺
+                        </strong>
+                        <span style="color: #28a745;">Kişisel Kazanç</span>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 text-md-end text-center mt-4 mt-md-0">

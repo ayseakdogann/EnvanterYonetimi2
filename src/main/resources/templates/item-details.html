@@ -107,6 +107,7 @@
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
                     <li><a class="dropdown-item" th:href="@{'/profile/' + ${currentUser.username}}">Profilim</a></li>
                     <li><hr class="dropdown-divider"></li>
+                    <li><span class="dropdown-item text-success fw-bold"><i class="bi bi-wallet2 me-1"></i> Cüzdan: <span th:text="${currentUser.balance != null ? currentUser.balance : 0.0}"></span> ₺</span></li>
                     <li><a class="dropdown-item text-danger" th:href="@{/login?logout}">Çıkış Yap</a></li>
                 </ul>
             </div>
@@ -141,6 +142,19 @@
                     <i class="bi bi-clock-history me-1"></i> Eklendi: <span th:text="${#temporals.format(item.createdAt, 'dd MMMM yyyy')}"></span>
                 </small>
             </div>
+            <!-- Admin veya Ürün Sahibi İçin Silme Butonu -->
+            <div th:if="${currentUser.role == 'ROLE_ADMIN'}" class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4">
+                <h6 class="fw-bold text-dark"><i class="bi bi-shield-lock-fill me-2"></i>Yönetici İşlemleri</h6>
+                <div class="d-flex gap-2 mt-2">
+                    <a th:href="@{'/items/delete/' + ${item.id}}" class="btn btn-danger btn-sm px-3 rounded-pill"
+                       onclick="return confirm('Bu ilanı sistemden kaldırmak istediğinize emin misiniz?')">
+                        <i class="bi bi-trash-fill"></i> İlanı Sil
+                    </a>
+                    <button class="btn btn-dark btn-sm px-3 rounded-pill disabled">
+                        <i class="bi bi-pencil-square"></i> İçeriği Düzenle
+                    </button>
+                </div>
+            </div>
 
             <!-- Ürün Açıklaması -->
             <div class="mb-5">
@@ -158,23 +172,24 @@
                     </div>
                     <div class="col-6 ps-4">
                         <p class="mb-1 small fw-bold" style="color: #ff8c00;">Mevcut En Yüksek Teklif</p>
-                        <h2 class="text-white fw-bold m-0" th:text="${item.currentHighestBid != null ? item.currentHighestBid : item.startingPrice} + ' ₺'"></h2>
+                        <h2 class="text-white fw-bold m-0"
+                            th:text="${#numbers.formatDecimal(item.currentHighestBid != null ? item.currentHighestBid : item.startingPrice, 1, 2)} + ' ₺'">
+                        </h2>
                     </div>
                 </div>
             </div>
 
-            <!-- Teklif Verme Formu -->
-            <div th:if="${!item.isSold and item.owner.username != currentUser.username}" class="mb-5">
+            <div th:if="${!item.isSold and item.owner.username == currentUser.username and item.currentHighestBid != null}" class="mb-4">
+                <form th:action="@{'/items/close-auction/' + ${item.id}}" method="post">
+                    <button type="submit" class="btn btn-success w-100 shadow-lg fw-bold" style="padding: 15px; font-size: 1.1rem; background: #28a745; border: none;">
+                        <i class="bi bi-cash-coin me-2"></i> Satışı Onayla ve Parayı Al
+                    </button>
+                </form>
+                <small class="text-white-50 d-block mt-2 text-center">*%10 sistem komisyonu kesildikten sonra kalan tutar profilinize aktarılır.</small>
+            </div>
+
+            <div th:if="${!item.isSold and item.owner.username != currentUser.username and currentUser.role != 'ROLE_ADMIN'}" class="mb-5">
                 <form th:action="@{'/items/bid/' + ${item.id}}" method="post">
-                    <div class="input-group mb-2 shadow-lg">
-                        <span class="input-group-text border-0 fw-bold">₺</span>
-                        <input type="number" step="0.1" name="amount"
-                               th:min="${item.currentHighestBid != null ? item.currentHighestBid + 1 : item.startingPrice + 1}"
-                               class="form-control border-0"
-                               placeholder="Daha yüksek bir teklif yazın..." required>
-                        <button type="submit" class="btn btn-bid px-5 text-uppercase">Teklif Ver</button>
-                    </div>
-                    <small class="text-white-50 italic"><i class="bi bi-info-circle me-1"></i> Teklifiniz mevcut fiyattan en az 1 ₺ yüksek olmalıdır.</small>
                 </form>
             </div>
 

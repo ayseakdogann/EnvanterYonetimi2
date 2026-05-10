@@ -28,5 +28,4 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     // Kategoriye (Tür) göre arama yap ve satışta olanları getir
     List<Item> findByForSaleTrueAndTypeContainingIgnoreCase(String type);
-
 }

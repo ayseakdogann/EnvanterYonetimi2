@@ -124,7 +124,10 @@
   <div class="vault-box">
     <i class="bi bi-bank"></i>
     <span class="vault-label">Sistem Kasası (Toplam Komisyon)</span>
-    <h1 class="vault-amount" th:text="${totalCommission} + ' ₺'">0.0 ₺</h1>
+      <h1 class="vault-amount"
+          th:text="${#numbers.formatDecimal(totalCommission != null ? totalCommission : 0, 1, 2)} + ' ₺'">
+          0.00 ₺
+      </h1>
     <p class="vault-description">
       Platform üzerinden yapılan tüm satışlardan kesilen <strong>%10'luk</strong> operasyonel gelirler.
     </p>

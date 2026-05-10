@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class AuthController {
 
-    @GetMapping("/login")
-    public String login() {
-        return "login"; // templates altındaki login.html'i çağırır
-    }
-
     @Autowired
     private com.koleksiyon.envanter.service.UserService userService;
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
     @GetMapping("/register")
     public String showRegisterForm(org.springframework.ui.Model model) {

@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,16 +29,21 @@ public class UserController {
         return userService.findByUsername(username);
     }
 
-    // TOPLULUK SAYFASI
+    // topluluk sayfası
     @GetMapping("/users")
     public String listAllUsers(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+        // Sadece normal kullanıcıları (ROLE_USER) filtrele, adminleri listeden çıkar
+        List<User> normalUsers = userService.getAllUsers().stream()
+                .filter(u -> !u.getRole().equals("ROLE_ADMIN"))
+                .collect(java.util.stream.Collectors.toList());
+
+        model.addAttribute("users", normalUsers);
         model.addAttribute("currentUser", getLoggedInUser());
         model.addAttribute("title", "Koleksiyoncular Topluluğu");
         return "users";
     }
 
-    // PROFİL SAYFASI (Kendisi veya Başkası)
+    // profil sayfası
     @GetMapping("/profile/{username}")
     @Transactional(readOnly = true)
     public String showProfile(@PathVariable String username, Model model) {
@@ -45,6 +51,15 @@ public class UserController {
         User currentUser = getLoggedInUser();
 
         if (targetUser == null) return "redirect:/items";
+
+        // Adminin profili yoktur. Biri girmeye çalışırsa pazara geri yolla.
+        // Eğer girmeye çalışan kişi adminin kendisiyse, onu dashboard'una yolla.
+        if (targetUser.getRole().equals("ROLE_ADMIN")) {
+            if (currentUser.getRole().equals("ROLE_ADMIN")) {
+                return "redirect:/admin/dashboard";
+            }
+            return "redirect:/items";
+        }
 
         model.addAttribute("user", targetUser);
         model.addAttribute("items", itemService.getItemsByOwner(targetUser));
@@ -54,37 +69,33 @@ public class UserController {
         return "profile";
     }
 
-    // --- YENİ EKLENEN TAKİPÇİ LİSTELEME METODLARI (404 HATASINI ÇÖZER) ---
-
-    // TAKİPÇİLERİ GÖRÜNTÜLEME
+    // takipçileri görüntüleme
     @GetMapping("/profile/{username}/followers")
     @Transactional(readOnly = true)
     public String showFollowers(@PathVariable String username, Model model) {
         User targetUser = userService.findByUsername(username);
         if (targetUser == null) return "redirect:/items";
 
-        // ÖNEMLİ:users.html içindeki döngü "users" ismini kullandığı için burası "users" olmalı
         model.addAttribute("users", targetUser.getFollowers());
         model.addAttribute("currentUser", getLoggedInUser());
         model.addAttribute("title", username + " - Takipçiler");
         return "users";
-    }// Takip edilenleri görüntüleme
+    }
+
+    // Takip edilenleri görüntüleme
     @GetMapping("/profile/{username}/following")
     @Transactional(readOnly = true)
     public String showFollowing(@PathVariable String username, Model model) {
         User targetUser = userService.findByUsername(username);
         if (targetUser == null) return "redirect:/items";
 
-        // ÖNEMLİ: Burası da "users" olmalı
         model.addAttribute("users", targetUser.getFollowing());
         model.addAttribute("currentUser", getLoggedInUser());
         model.addAttribute("title", username + " - Takip Edilenler");
         return "users";
     }
 
-    // ------------------------------------------------------------------
-
-    // PROFİL DÜZENLEME FORMU
+    // profil düzenleme formu
     @GetMapping("/profile/edit")
     public String editProfileForm(Model model) {
         User currentUser = getLoggedInUser();
@@ -93,7 +104,7 @@ public class UserController {
         return "profile-edit";
     }
 
-    // PROFİL GÜNCELLEME
+    // profil güncelleme
     @PostMapping("/profile/update")
     public String updateProfile(@ModelAttribute UserDTO userDTO) throws IOException {
         User currentUser = getLoggedInUser();
@@ -110,7 +121,7 @@ public class UserController {
         return "redirect:/profile/" + currentUser.getUsername();
     }
 
-    // PROFİL RESMİNİ ÇEKEN ENDPOINT
+    // profil resmini çeken endpoint
     @GetMapping("/profile/image/{username}")
     @ResponseBody
     public ResponseEntity<byte[]> getProfileImage(@PathVariable String username) {
@@ -123,7 +134,7 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    // TAKİP ETME / TAKİPTEN ÇIKMA MANTIĞI
+    // takip etme takipten çıkma mantığı
     @PostMapping("/follow/{username}")
     @Transactional
     public String followUser(@PathVariable String username) {
@@ -141,10 +152,16 @@ public class UserController {
         return "redirect:/profile/" + username;
     }
 
-    // KENDİ KOLEKSİYONUM
+    // kendi koleksiyonum
     @GetMapping("/my-collection")
     public String myCollection(Model model) {
         User currentUser = getLoggedInUser();
+
+        // Admin koleksiyon sayfasına girmeye çalışırsa kendi paneline yolla
+        if (currentUser.getRole().equals("ROLE_ADMIN")) {
+            return "redirect:/admin/dashboard";
+        }
+
         model.addAttribute("items", itemService.getItemsByOwner(currentUser));
         model.addAttribute("currentUser", currentUser);
         return "my-collection";

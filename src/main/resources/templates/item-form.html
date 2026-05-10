@@ -129,7 +129,11 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-3"><a class="btn btn-outline-light nav-btn-custom btn-sm" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a></li>
-                <li class="nav-item me-3"><a class="btn btn-outline-warning nav-btn-custom btn-sm text-warning" th:href="@{/my-collection}" style="border-color: #ff8c00;"><i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum</a></li>
+                <li class="nav-item me-3" th:if="${currentUser.role != 'ROLE_ADMIN'}">
+                    <a class="nav-link" style="color: #ff8c00 !important; font-weight: bold;" th:href="@{/my-collection}">
+                        <i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum
+                    </a>
+                </li>
                 <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role == 'ROLE_ADMIN'}">
                     <a class="btn btn-danger nav-btn-custom btn-sm" th:href="@{/admin/dashboard}"><i class="bi bi-safe2"></i> Kasa</a>
                 </li>
