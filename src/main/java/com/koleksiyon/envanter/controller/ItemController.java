@@ -103,7 +103,7 @@ public class ItemController {
         }
         return "redirect:/my-collection";
     }
-    // ürün ekleme formu
+    // ürün ekleme formu :)
     @GetMapping("/add")
     public String showAddForm(Model model) {
         User currentUser = getLoggedInUser();
