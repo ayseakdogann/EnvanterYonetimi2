@@ -126,25 +126,40 @@ public class UserController {
     public String deleteAccount(RedirectAttributes redirectAttributes) {
         User currentUser = getLoggedInUser();
 
-        // 1. Kullanıcıya ait ÜRÜNLERİ sil (Zaten vardı)
+        // Bizi takip edenlerin listesinden bizi çıkar
+        for (User follower : currentUser.getFollowers()) {
+            follower.getFollowing().remove(currentUser);
+            userService.updateUser(follower);
+        }
+
+        // Bizim takip ettiklerimizin listesinden bizi çıkar
+        for (User following : currentUser.getFollowing()) {
+            following.getFollowers().remove(currentUser);
+            userService.updateUser(following);
+        }
+
+        currentUser.getFollowers().clear();
+        currentUser.getFollowing().clear();
+        userService.updateUser(currentUser);
+
+        // kullanıcıya ait ürünleri sil
         List<Item> userItems = itemService.getItemsByOwner(currentUser);
         for (Item item : userItems) {
             itemService.deleteItem(item.getId());
         }
 
-        // 2. YENİ EKLENEN KISIM: Kullanıcının verdiği TEKLİFLERİ (Bids) sil
-        // Bu adım veritabanındaki foreign key hatasını çözer.
         itemService.deleteBidsByUserId(currentUser.getId());
 
-        // 3. Kullanıcıyı sil
+        //Kullanıcıyı sil
         userService.deleteUser(currentUser.getId());
 
-        // 4. Güvenlik bağlamını temizle (Logout)
+        // Güvenlik bağlamını temizle (Logout)
         SecurityContextHolder.clearContext();
 
         redirectAttributes.addFlashAttribute("successMessage", "Hesabınız ve tüm verileriniz başarıyla silindi.");
         return "redirect:/login?deleted";
     }
+
     // profil resmini çeken endpoint
     @GetMapping("/profile/image/{username}")
     @ResponseBody
