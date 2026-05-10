@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Koleksiyona Ürün Ekle | Koleksiyon Ağı</title>
+    <title th:text="${isEdit} ? 'Parçayı Düzenle | Koleksiyon Ağı' : 'Yeni Parça Ekle | Koleksiyon Ağı'"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -59,9 +59,8 @@
             border-radius: 12px;
         }
 
-        /* Kategorilerin okunmama sorununu çözen kısım */
         .form-select option {
-            background-color: #1e1e1e; /* Dropdown açıldığında arka plan koyu olsun */
+            background-color: #1e1e1e;
             color: #fff;
         }
 
@@ -97,7 +96,6 @@
             box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
         }
 
-        /* Geri Butonu Stili */
         .btn-back {
             color: #ff8c00;
             text-decoration: none;
@@ -129,13 +127,10 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-3"><a class="btn btn-outline-light nav-btn-custom btn-sm" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a></li>
-                <li class="nav-item me-3" th:if="${currentUser.role != 'ROLE_ADMIN'}">
+                <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role != 'ROLE_ADMIN'}">
                     <a class="nav-link" style="color: #ff8c00 !important; font-weight: bold;" th:href="@{/my-collection}">
                         <i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum
                     </a>
-                </li>
-                <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role == 'ROLE_ADMIN'}">
-                    <a class="btn btn-danger nav-btn-custom btn-sm" th:href="@{/admin/dashboard}"><i class="bi bi-safe2"></i> Kasa</a>
                 </li>
                 <li class="nav-item">
                     <form th:action="@{/logout}" method="post" class="d-inline">
@@ -150,15 +145,22 @@
 <div class="container pb-5">
     <div class="row justify-content-center">
         <div class="col-md-7">
-            <!-- Geri Dön Butonu -->
-            <a th:href="@{/items}" class="btn-back">
-                <i class="bi bi-arrow-left-circle me-2"></i> Pazara Geri Dön
+            <a th:href="${isEdit} ? @{/my-collection} : @{/items}" class="btn-back">
+                <i class="bi bi-arrow-left-circle me-2"></i>
+                <span th:text="${isEdit} ? 'Koleksiyonuma Dön' : 'Pazara Geri Dön'"></span>
             </a>
 
             <div class="form-card shadow-lg">
-                <h3 class="section-title"><i class="bi bi-plus-circle-fill me-2"></i>Koleksiyonuna Yeni Parça Ekle</h3>
+                <h3 class="section-title">
+                    <i th:class="${isEdit} ? 'bi bi-pencil-square me-2' : 'bi bi-plus-circle-fill me-2'"></i>
+                    <span th:text="${isEdit} ? 'Parçayı Düzenle' : 'Koleksiyonuna Yeni Parça Ekle'"></span>
+                </h3>
 
-                <form th:action="@{/items/save}" th:object="${itemDTO}" method="post" enctype="multipart/form-data">
+                <form th:action="${isEdit} ? @{'/items/update/' + ${itemId}} : @{/items/save}"
+                      th:object="${itemDTO}"
+                      method="post"
+                      enctype="multipart/form-data">
+
                     <div class="mb-3">
                         <label class="form-label">Ürün Adı *</label>
                         <input type="text" class="form-control" th:field="*{name}" required placeholder="Örn: 1960 Rolex Saat">
@@ -188,7 +190,7 @@
                             <i class="bi bi-tag-fill me-1"></i> Satış Fiyatı (İsteğe Bağlı)
                         </label>
                         <small class="d-block text-white-50 mb-3" style="font-size: 0.8rem;">
-                            Eğer ürünü ileride satmayı düşünüyorsan bir fiyat belirtebilirsin. Sadece sergilenecekse boş bırak.
+                            Eğer ürünü ileride satmayı düşünüyorsan bir fiyat belirtebilirsin.
                         </small>
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-warning">₺</span>
@@ -197,13 +199,19 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">Ürün Görseli Yükle *</label>
-                        <input type="file" class="form-control" name="imageFile" required accept="image/*">
-                        <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Desteklenen formatlar: JPG, PNG, WEBP</small>
+                        <label class="form-label">Ürün Görseli <span th:if="${!isEdit}">*</span></label>
+                        <input type="file" class="form-control" name="imageFile" th:required="${!isEdit}" accept="image/*">
+                        <small th:if="${isEdit}" class="text-warning mt-1 d-block" style="font-size: 0.75rem;">
+                            Değiştirmek istemiyorsanız görsel seçmenize gerek yoktur.
+                        </small>
+                        <small th:if="${!isEdit}" class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">
+                            Desteklenen formatlar: JPG, PNG, WEBP
+                        </small>
                     </div>
 
                     <button type="submit" class="btn btn-add-item w-100">
-                        <i class="bi bi-box-seam me-2"></i>Koleksiyonuma Ekle
+                        <i th:class="${isEdit} ? 'bi bi-check-circle me-2' : 'bi bi-box-seam me-2'"></i>
+                        <span th:text="${isEdit} ? 'Değişiklikleri Kaydet' : 'Koleksiyonuma Ekle'"></span>
                     </button>
                 </form>
             </div>

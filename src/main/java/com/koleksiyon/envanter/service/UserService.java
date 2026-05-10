@@ -1,6 +1,7 @@
 package com.koleksiyon.envanter.service;
 
 import com.koleksiyon.envanter.entity.User;
+import com.koleksiyon.envanter.repository.BidRepository;
 import com.koleksiyon.envanter.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     @Autowired
     private final PasswordEncoder passwordEncoder;
-
+    private final BidRepository bidRepository;
     // Spring Security'nin giriş yaparken kullanıcıyı veritabanında bulması için gereken zorunlu metot
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -56,7 +57,22 @@ public class UserService implements UserDetailsService {
             userRepository.save(admin);
         }
     }
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
 
+        // 1. ADIM: Kullanıcının verdiği teklifleri sil (Foreign Key hatasını çözer)
+        // BidRepository'de b.bidder.id üzerinden silme yapan metodumuzu çağırıyoruz
+        bidRepository.deleteByUserId(userId);
+
+        // 2. ADIM: Takip ilişkilerini temizle
+        user.getFollowers().clear();
+        user.getFollowing().clear();
+
+        // 3. ADIM: Kullanıcıyı sil
+        userRepository.delete(user);
+    }
     @Transactional
     public void updateUser(User user) {
         userRepository.save(user);

@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body {
-            /* Diğer sayfalarla uyumlu derin radyal degrade */
             background: radial-gradient(circle at center, #1e1e1e 0%, #000000 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
@@ -18,7 +17,6 @@
             color: #fff;
         }
 
-        /* Düzenleme Kartı: Glassmorphism Efekti */
         .edit-card {
             background: rgba(255, 255, 255, 0.07);
             backdrop-filter: blur(25px);
@@ -28,19 +26,19 @@
             width: 100%;
             max-width: 550px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            margin: 40px 0;
         }
 
         .edit-title {
             font-size: 1.8rem;
             font-weight: 800;
-            color: #ff0000; /* Tematik Kırmızı */
+            color: #ff0000;
             text-align: center;
             margin-bottom: 30px;
         }
 
-        /* Form Elemanları */
         .form-label {
-            color: #ff8c00; /* Tematik Turuncu */
+            color: #ff8c00;
             font-weight: 600;
             font-size: 0.9rem;
             margin-bottom: 8px;
@@ -62,7 +60,6 @@
             outline: none;
         }
 
-        /* Butonlar */
         .btn-save {
             background-color: #ff0000;
             border: none;
@@ -95,7 +92,36 @@
             color: #ff0000;
         }
 
-        /* Date picker ikonu rengi için (Bazı tarayıcılarda) */
+        /* Tehlikeli Bölge Stili */
+        .danger-zone {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .danger-title {
+            color: #ff4d4d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .btn-delete-account {
+            background: transparent;
+            border: 1px solid #ff4d4d;
+            color: #ff4d4d;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .btn-delete-account:hover {
+            background: #ff4d4d;
+            color: #fff;
+        }
+
         ::-webkit-calendar-picker-indicator {
             filter: invert(1);
         }
@@ -103,7 +129,7 @@
 </head>
 <body>
 
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="edit-card shadow-lg">
@@ -145,6 +171,17 @@
                         <i class="bi bi-x-circle me-1"></i>Vazgeç ve Geri Dön
                     </a>
                 </form>
+
+                <div class="danger-zone">
+                    <h5 class="danger-title"><i class="bi bi-exclamation-triangle me-2"></i>Tehlikeli Bölge</h5>
+                    <p class="text-white-50 small mb-3">Hesabınızı sildiğinizde tüm koleksiyonunuz ve verileriniz kalıcı olarak yok edilecektir. Bu işlem geri alınamaz.</p>
+                    <form th:action="@{/profile/delete}" method="post"
+                          onsubmit="return confirm('HESABINIZI SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ? Bu işlem geri alınamaz ve tüm koleksiyonunuz silinir!');">
+                        <button type="submit" class="btn btn-delete-account w-100">
+                            Hesabımı Kalıcı Olarak Sil
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

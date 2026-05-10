@@ -1,6 +1,7 @@
 package com.koleksiyon.envanter.controller;
 
 import com.koleksiyon.envanter.dto.UserDTO;
+import com.koleksiyon.envanter.entity.Item;
 import com.koleksiyon.envanter.entity.User;
 import com.koleksiyon.envanter.service.ItemService;
 import com.koleksiyon.envanter.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,7 +34,6 @@ public class UserController {
     // topluluk sayfası
     @GetMapping("/users")
     public String listAllUsers(Model model) {
-        // Sadece normal kullanıcıları (ROLE_USER) filtrele, adminleri listeden çıkar
         List<User> normalUsers = userService.getAllUsers().stream()
                 .filter(u -> !u.getRole().equals("ROLE_ADMIN"))
                 .collect(java.util.stream.Collectors.toList());
@@ -52,8 +53,6 @@ public class UserController {
 
         if (targetUser == null) return "redirect:/items";
 
-        // Adminin profili yoktur. Biri girmeye çalışırsa pazara geri yolla.
-        // Eğer girmeye çalışan kişi adminin kendisiyse, onu dashboard'una yolla.
         if (targetUser.getRole().equals("ROLE_ADMIN")) {
             if (currentUser.getRole().equals("ROLE_ADMIN")) {
                 return "redirect:/admin/dashboard";
@@ -121,6 +120,31 @@ public class UserController {
         return "redirect:/profile/" + currentUser.getUsername();
     }
 
+    // HESABI KALICI OLARAK SİLME
+    @PostMapping("/profile/delete")
+    @Transactional
+    public String deleteAccount(RedirectAttributes redirectAttributes) {
+        User currentUser = getLoggedInUser();
+
+        // 1. Kullanıcıya ait ÜRÜNLERİ sil (Zaten vardı)
+        List<Item> userItems = itemService.getItemsByOwner(currentUser);
+        for (Item item : userItems) {
+            itemService.deleteItem(item.getId());
+        }
+
+        // 2. YENİ EKLENEN KISIM: Kullanıcının verdiği TEKLİFLERİ (Bids) sil
+        // Bu adım veritabanındaki foreign key hatasını çözer.
+        itemService.deleteBidsByUserId(currentUser.getId());
+
+        // 3. Kullanıcıyı sil
+        userService.deleteUser(currentUser.getId());
+
+        // 4. Güvenlik bağlamını temizle (Logout)
+        SecurityContextHolder.clearContext();
+
+        redirectAttributes.addFlashAttribute("successMessage", "Hesabınız ve tüm verileriniz başarıyla silindi.");
+        return "redirect:/login?deleted";
+    }
     // profil resmini çeken endpoint
     @GetMapping("/profile/image/{username}")
     @ResponseBody
@@ -157,7 +181,6 @@ public class UserController {
     public String myCollection(Model model) {
         User currentUser = getLoggedInUser();
 
-        // Admin koleksiyon sayfasına girmeye çalışırsa kendi paneline yolla
         if (currentUser.getRole().equals("ROLE_ADMIN")) {
             return "redirect:/admin/dashboard";
         }

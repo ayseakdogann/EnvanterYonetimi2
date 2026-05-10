@@ -143,7 +143,11 @@ public class ItemService {
         }
         return itemRepository.findByForSaleTrue();
     }
-
+    @Transactional
+    public void deleteBidsByUserId(Long userId) {
+        // BidRepository üzerinden kullanıcıya ait teklifleri siler
+        bidRepository.deleteByUserId(userId);
+    }
     // Kullanıcının koleksiyonundaki (satılık olsun olmasın) her şeyi getirmek için
     @Transactional(readOnly = true)
     public List<Item> getItemsByOwner(User owner) {

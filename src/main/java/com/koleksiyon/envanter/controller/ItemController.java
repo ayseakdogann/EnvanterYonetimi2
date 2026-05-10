@@ -55,7 +55,54 @@ public class ItemController {
         model.addAttribute("currentUser", getLoggedInUser());
         return "index";
     }
+    // ÜRÜN DÜZENLEME FORMU
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Item item = itemService.getItemById(id);
+        User currentUser = getLoggedInUser();
 
+        // Güvenlik: Sadece sahibi veya admin düzenleyebilir (Genelde sadece sahibi)
+        if (!item.getOwner().getUsername().equals(currentUser.getUsername())) {
+            return "redirect:/my-collection?error=unauthorized";
+        }
+
+        // Mevcut ürünü DTO'ya çevirip forma gönderiyoruz
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setName(item.getName());
+        itemDTO.setType(item.getType());
+        itemDTO.setDescription(item.getDescription());
+        itemDTO.setStartingPrice(item.getStartingPrice());
+        // id bilgisini HTML'de action oluşturmak için modele ayrıca ekleyelim
+
+        model.addAttribute("itemDTO", itemDTO);
+        model.addAttribute("itemId", id); // Güncelleme için ID gerekli
+        model.addAttribute("isEdit", true);
+        model.addAttribute("currentUser", currentUser);
+        return "item-form";
+    }
+
+    // ÜRÜN GÜNCELLEME İŞLEMİ
+    @PostMapping("/update/{id}")
+    @Transactional
+    public String updateItem(@PathVariable Long id, @ModelAttribute("itemDTO") ItemDTO itemDTO) throws IOException {
+        Item existingItem = itemService.getItemById(id);
+        User currentUser = getLoggedInUser();
+
+        if (existingItem.getOwner().getUsername().equals(currentUser.getUsername())) {
+            existingItem.setName(itemDTO.getName());
+            existingItem.setType(itemDTO.getType());
+            existingItem.setDescription(itemDTO.getDescription());
+            existingItem.setStartingPrice(itemDTO.getStartingPrice());
+
+            // Eğer yeni bir resim yüklendiyse güncelle, yüklenmediyse eskisini koru
+            if (itemDTO.getImageFile() != null && !itemDTO.getImageFile().isEmpty()) {
+                existingItem.setImage(itemDTO.getImageFile().getBytes());
+            }
+
+            itemRepository.save(existingItem);
+        }
+        return "redirect:/my-collection";
+    }
     // ürün ekleme formu
     @GetMapping("/add")
     public String showAddForm(Model model) {
