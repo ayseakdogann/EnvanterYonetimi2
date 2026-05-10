@@ -107,14 +107,16 @@ public class ItemController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
         User currentUser = getLoggedInUser();
-
-        // Adminlerin ürün eklemesini engelleme kontrolü
         if (currentUser.getRole().equals("ROLE_ADMIN")) {
             return "redirect:/items?error=admin_cannot_add";
         }
 
         model.addAttribute("itemDTO", new ItemDTO());
         model.addAttribute("currentUser", currentUser);
+
+        // BURASI ÇOK ÖNEMLİ: Yeni ekleme yaparken isEdit false olmalı
+        model.addAttribute("isEdit", false);
+
         return "item-form";
     }
 

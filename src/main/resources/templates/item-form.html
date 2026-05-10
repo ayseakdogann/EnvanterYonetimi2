@@ -199,7 +199,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">Ürün Görseli <span th:if="${!isEdit}">*</span></label>
+                        <label class="form-label">Ürün Görseli <span th:if="${isEdit == null or !isEdit}">*</span></label>
                         <input type="file" class="form-control" name="imageFile" th:required="${!isEdit}" accept="image/*">
                         <small th:if="${isEdit}" class="text-warning mt-1 d-block" style="font-size: 0.75rem;">
                             Değiştirmek istemiyorsanız görsel seçmenize gerek yoktur.
