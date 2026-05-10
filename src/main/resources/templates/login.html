@@ -128,6 +128,29 @@
     <div class="brand-logo">✨ Koleksiyon Ağı</div>
     <h5 class="hobi-text">Hobi Dünyanıza Bağlanın</h5>
 
+    <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center mb-4 shadow-sm"
+         style="background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; color: #ff6666; border-radius: 12px;">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div>Kullanıcı adı veya şifre hatalı! Lütfen tekrar deneyin.</div>
+    </div>
+
+    <div th:if="${param.logout}" class="alert alert-info d-flex align-items-center mb-4 shadow-sm"
+         style="background: rgba(13, 202, 240, 0.1); border: 1px solid #0dcaf0; color: #5ddcf5; border-radius: 12px;">
+        <i class="bi bi-door-closed-fill me-2 fs-5"></i>
+        <div>Başarıyla çıkış yaptınız. Yeniden bekleriz!</div>
+    </div>
+
+    <div th:if="${param.registered}" class="alert alert-success d-flex align-items-center mb-4 shadow-sm"
+         style="background: rgba(40, 167, 69, 0.1); border: 1px solid #28a745; color: #75ec8d; border-radius: 12px;">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <div>Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.</div>
+    </div>
+
+    <div th:if="${param.deleted}" class="alert alert-warning d-flex align-items-center mb-4 shadow-sm"
+         style="background: rgba(255, 140, 0, 0.1); border: 1px solid #ff8c00; color: #ffbc66; border-radius: 12px;">
+        <i class="bi bi-emoji-frown-fill me-2 fs-5"></i>
+        <div>Hesabınız ve tüm verileriniz kalıcı olarak silindi. Sizi özleyeceğiz!</div>
+    </div>
     <form th:action="@{/login}" method="post">
         <div class="mb-3">
             <label class="form-label small">Kullanıcı Adı</label>
