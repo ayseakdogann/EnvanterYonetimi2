@@ -1,0 +1,1 @@
+INSERT INTO system_vault (id, total_commission) VALUES (1, 0.0) ON CONFLICT DO NOTHING;

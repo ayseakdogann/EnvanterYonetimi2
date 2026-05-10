@@ -2,64 +2,211 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${item.name}"></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${item.name} + ' | Koleksiyon Ağı'"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #487fd0; color: #e0e0e0; }
-        .navbar { background-color: #1a1a1a !important; border-bottom: 2px solid #198754; }
-        .detail-container { background: #1e1e1e; border-radius: 20px; padding: 30px; border: 1px solid #333; }
-        .item-full-img { width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgb(72, 127, 208); }
-        .desc-text { color: #bbb; line-height: 1.6; }
-        .collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .btn-more { color: #198754; cursor: pointer; font-weight: bold; text-decoration: none; display: block; margin-top: 5px; }
+        body {
+            /* Diğer sayfalarla uyumlu derin radyal degrade */
+            background: radial-gradient(circle at center, #1e1e1e 0%, #000000 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navbar: Şeffaf ve Buzlu */
+        .navbar {
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: #ff0000 !important;
+            letter-spacing: 1px;
+        }
+
+        /* Ana Konteynır: Glassmorphism */
+        .detail-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .item-full-img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            object-fit: contain;
+            max-height: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .desc-text { color: #ccc; line-height: 1.7; white-space: pre-wrap; font-size: 1.05rem; }
+        .collapsed { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .btn-more { color: #ff8c00; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 10px; }
+        .btn-more:hover { color: #ff0000; }
+
+        /* Fiyat Kutusu */
+        .price-box {
+            background: rgba(255, 140, 0, 0.05);
+            border-left: 5px solid #ff0000;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+        .price-box:hover { background: rgba(255, 140, 0, 0.08); }
+
+        /* Kullanıcı Kartı */
+        .owner-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .owner-card:hover { border-color: #ff0000; background: rgba(255, 255, 255, 0.06); }
+
+        .profile-avatar { width: 55px; height: 55px; object-fit: cover; border: 2px solid #ff0000; }
+
+        .badge-custom { background: #ff0000; color: white; font-weight: bold; }
+
+        /* Form Elemanları */
+        .input-group-text { background: #1a1a1a; border-color: rgba(255,255,255,0.2); color: #ff8c00; }
+        .form-control { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); color: white; }
+        .form-control:focus { background: rgba(0,0,0,0.4); border-color: #ff0000; color: white; box-shadow: none; }
+
+        .btn-bid { background: #ff0000; border: none; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-bid:hover { background: #cc0000; transform: translateY(-2px); }
+
+        h1, .text-success-custom { color: #ff8c00 !important; }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+
+<!-- Navigasyon Barı -->
+<nav class="navbar navbar-expand-lg navbar-dark mb-4 sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/items}">📚 Koleksiyon Ağı</a>
-        <div class="ms-auto"><a th:href="@{/items}" class="btn btn-outline-light btn-sm">← Pazara Geri Dön</a></div>
+        <a class="navbar-brand fw-bold" th:href="@{/items}">✨ Koleksiyon Ağı</a>
+        <div class="ms-auto d-flex align-items-center">
+            <a th:href="@{/items}" class="btn btn-outline-light btn-sm me-3 rounded-pill px-3">
+                <i class="bi bi-arrow-left"></i> Pazara Dön
+            </a>
+            <div th:if="${currentUser != null}" class="dropdown">
+                <button class="btn btn-danger btn-sm dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i> <span th:text="${currentUser.username}"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
+                    <li><a class="dropdown-item" th:href="@{'/profile/' + ${currentUser.username}}">Profilim</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" th:href="@{/login?logout}">Çıkış Yap</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </nav>
 
-<div class="container mt-5">
-    <div class="row detail-container shadow-lg">
-        <div class="col-md-5">
-            <img th:src="@{'/items/image/' + ${item.id}}" class="item-full-img" alt="Ürün">
+<div class="container mt-4">
+    <div class="row detail-container g-5">
+
+        <!-- Ürün Görseli Bölümü -->
+        <div class="col-lg-5">
+            <div class="position-relative">
+                <img th:src="@{'/items/image/' + ${item.id}}" class="item-full-img" th:alt="${item.name}">
+                <span th:if="${item.isSold}" class="position-absolute top-0 start-0 m-3 badge bg-danger fs-5 shadow-lg px-4 py-2 rounded-pill">SATILDI</span>
+            </div>
         </div>
-        <div class="col-md-7 ps-md-5">
-            <h1 class="fw-bold text-white mb-2" th:text="${item.name}"></h1>
-            <span class="badge bg-success mb-4" th:text="${item.type}"></span>
 
-            <div class="mb-4">
-                <h5 class="text-success fw-bold">Ürün Hikayesi</h5>
+        <!-- Ürün Detayları Bölümü -->
+        <div class="col-lg-7 ps-lg-5">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/items}" class="text-decoration-none" style="color: #ff8c00;">Pazar</a></li>
+                    <li class="breadcrumb-item active text-muted" aria-current="page" th:text="${item.type}"></li>
+                </ol>
+            </nav>
+
+            <h1 class="fw-bold mb-2" th:text="${item.name}"></h1>
+            <div class="d-flex align-items-center mb-4">
+                <span class="badge badge-custom px-3 py-2" th:text="${item.type}"></span>
+                <small class="ms-3 text-white-50">
+                    <i class="bi bi-clock-history me-1"></i> Eklendi: <span th:text="${#temporals.format(item.createdAt, 'dd MMMM yyyy')}"></span>
+                </small>
+            </div>
+
+            <!-- Ürün Açıklaması -->
+            <div class="mb-5">
+                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: #ff8c00; border-color: rgba(255,255,255,0.1) !important;">Ürün Hikayesi</h5>
                 <div id="descContainer" class="desc-text collapsed" th:text="${item.description}"></div>
-                <a id="toggleBtn" class="btn-more" onclick="toggleDesc()">Daha Fazla Göster</a>
+                <a th:if="${#strings.length(item.description) > 200}" id="toggleBtn" class="btn-more" onclick="toggleDesc()">Tüm Hikayeyi Oku</a>
             </div>
 
-            <div class="p-3 rounded mb-4" style="background: #252525; border-left: 5px solid #198754;">
-                <p class="mb-1 text-muted small">Mevcut En Yüksek Teklif</p>
-                <h2 class="text-white fw-bold" th:text="${item.currentHighestBid != null ? item.currentHighestBid : item.startingPrice} + ' ₺'"></h2>
-            </div>
-
-            <!-- Teklif Formu -->
-            <form th:if="${!item.isSold}" th:action="@{'/items/bid/' + ${item.id}}" method="post" class="d-flex gap-2 mb-5">
-                <input type="number" name="amount" class="form-control bg-dark text-white border-secondary" placeholder="Teklifinizi yazın..." required>
-                <button type="submit" class="btn btn-success px-4 fw-bold">Teklif Ver</button>
-            </form>
-
-            <div class="card bg-dark border-secondary p-3 rounded-4">
-                <div class="d-flex align-items-center">
-                    <div class="bg-success rounded-circle me-3" style="width: 50px; height: 50px;"></div>
-                    <div>
-                        <a th:href="@{'/profile/' + ${item.owner.username}}" class="text-white fw-bold text-decoration-none" th:text="${item.owner.username}"></a>
-                        <p class="text-muted small mb-0" th:text="${item.owner.email}"></p>
+            <!-- Fiyat Bilgisi -->
+            <div class="p-4 rounded price-box mb-4 shadow-sm">
+                <div class="row align-items-center">
+                    <div class="col-6 border-end border-secondary">
+                        <p class="mb-1 text-white-50 small">Başlangıç Fiyatı</p>
+                        <h4 class="text-white fw-bold m-0" th:text="${item.startingPrice} + ' ₺'"></h4>
+                    </div>
+                    <div class="col-6 ps-4">
+                        <p class="mb-1 small fw-bold" style="color: #ff8c00;">Mevcut En Yüksek Teklif</p>
+                        <h2 class="text-white fw-bold m-0" th:text="${item.currentHighestBid != null ? item.currentHighestBid : item.startingPrice} + ' ₺'"></h2>
                     </div>
                 </div>
             </div>
+
+            <!-- Teklif Verme Formu -->
+            <div th:if="${!item.isSold and item.owner.username != currentUser.username}" class="mb-5">
+                <form th:action="@{'/items/bid/' + ${item.id}}" method="post">
+                    <div class="input-group mb-2 shadow-lg">
+                        <span class="input-group-text border-0 fw-bold">₺</span>
+                        <input type="number" step="0.1" name="amount"
+                               th:min="${item.currentHighestBid != null ? item.currentHighestBid + 1 : item.startingPrice + 1}"
+                               class="form-control border-0"
+                               placeholder="Daha yüksek bir teklif yazın..." required>
+                        <button type="submit" class="btn btn-bid px-5 text-uppercase">Teklif Ver</button>
+                    </div>
+                    <small class="text-white-50 italic"><i class="bi bi-info-circle me-1"></i> Teklifiniz mevcut fiyattan en az 1 ₺ yüksek olmalıdır.</small>
+                </form>
+            </div>
+
+            <!-- Kullanıcı Bilgisi -->
+            <div class="owner-card p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <img th:if="${item.owner.profileImage != null}"
+                             th:src="@{'/profile/image/' + ${item.owner.username}}"
+                             class="profile-avatar rounded-circle me-3">
+                        <div th:unless="${item.owner.profileImage != null}"
+                             class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold"
+                             style="width: 55px; height: 55px; font-size: 22px;">
+                            <span th:text="${item.owner.username.substring(0,1).toUpperCase()}"></span>
+                        </div>
+                        <div>
+                            <p class="mb-0 text-white-50 small">Koleksiyon Sahibi</p>
+                            <a th:href="@{'/profile/' + ${item.owner.username}}"
+                               class="text-white fw-bold text-decoration-none h5 mb-0"
+                               th:text="${item.owner.username}"></a>
+                        </div>
+                    </div>
+                    <a th:href="@{'/profile/' + ${item.owner.username}}" class="btn btn-outline-light btn-sm px-4 rounded-pill">Profili Gör</a>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function toggleDesc() {
@@ -70,7 +217,7 @@
             btn.innerText = 'Daha Az Göster';
         } else {
             container.classList.add('collapsed');
-            btn.innerText = 'Daha Fazla Göster';
+            btn.innerText = 'Tüm Hikayeyi Oku';
         }
     }
 </script>

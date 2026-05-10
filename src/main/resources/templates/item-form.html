@@ -2,69 +2,205 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Koleksiyona Ürün Ekle</title>
+    <title>Koleksiyona Ürün Ekle | Koleksiyon Ağı</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #487fd0; color: #e0e0e0; }
-        .navbar { background-color: #487fd0 !important; border-bottom: 2px solid #198754; }
-        .form-card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 15px; }
-        .form-control, .form-select { background-color: #2d2d2d; border: 1px solid #444; color: #fff; }
-        .form-control:focus, .form-select:focus { background-color: #333; color: #fff; border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
-        label { font-weight: 600; color: #bbb; }
+        body {
+            background: radial-gradient(circle at center, #1e1e1e 0%, #000000 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: #ff0000 !important;
+            letter-spacing: 1px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+
+        .section-title {
+            color: #ff8c00;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #ff8c00;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff !important;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        /* Kategorilerin okunmama sorununu çözen kısım */
+        .form-select option {
+            background-color: #1e1e1e; /* Dropdown açıldığında arka plan koyu olsun */
+            color: #fff;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: #ff0000;
+            box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25);
+            outline: none;
+        }
+
+        .price-section {
+            background-color: rgba(255, 140, 0, 0.05);
+            border: 1px dashed rgba(255, 140, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .btn-add-item {
+            background-color: #ff0000;
+            border: none;
+            padding: 14px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            color: #fff;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-add-item:hover {
+            background-color: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        /* Geri Butonu Stili */
+        .btn-back {
+            color: #ff8c00;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            color: #ff0000;
+            transform: translateX(-5px);
+        }
+
+        .nav-btn-custom {
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 6px 15px;
+            transition: 0.3s;
+        }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark mb-5 shadow-sm">
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4 shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/items}">📚 Koleksiyon Ağı</a>
+        <a class="navbar-brand fw-bold" th:href="@{/items}">✨ Koleksiyon Ağı</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item me-3"><a class="btn btn-outline-light btn-sm fw-bold" th:href="@{/users}">👥 Topluluk</a></li>
-                <li class="nav-item me-3"><a class="btn btn-success btn-sm fw-bold" th:href="@{/my-collection}">📖 Koleksiyonum</a></li>
+                <li class="nav-item me-3"><a class="btn btn-outline-light nav-btn-custom btn-sm" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a></li>
+                <li class="nav-item me-3"><a class="btn btn-outline-warning nav-btn-custom btn-sm text-warning" th:href="@{/my-collection}" style="border-color: #ff8c00;"><i class="bi bi-journal-bookmark-fill"></i> Koleksiyonum</a></li>
                 <li class="nav-item me-3" th:if="${currentUser != null and currentUser.role == 'ROLE_ADMIN'}">
-                    <a class="btn btn-warning btn-sm fw-bold text-dark" th:href="@{/admin/dashboard}">💰 Kasa</a>
+                    <a class="btn btn-danger nav-btn-custom btn-sm" th:href="@{/admin/dashboard}"><i class="bi bi-safe2"></i> Kasa</a>
                 </li>
-                <li class="nav-item"><a class="btn btn-danger btn-sm" th:href="@{'/login?logout'}">Çıkış</a></li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4">Çıkış</button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container">
+<div class="container pb-5">
     <div class="row justify-content-center">
         <div class="col-md-7">
-            <div class="card form-card shadow-lg p-4 mb-5">
-                <h3 class="fw-bold text-center mb-4 text-white">✨ Koleksiyonuna Yeni Parça Ekle</h3>
+            <!-- Geri Dön Butonu -->
+            <a th:href="@{/items}" class="btn-back">
+                <i class="bi bi-arrow-left-circle me-2"></i> Pazara Geri Dön
+            </a>
+
+            <div class="form-card shadow-lg">
+                <h3 class="section-title"><i class="bi bi-plus-circle-fill me-2"></i>Koleksiyonuna Yeni Parça Ekle</h3>
 
                 <form th:action="@{/items/save}" th:object="${itemDTO}" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label">Ürün Adı *</label>
                         <input type="text" class="form-control" th:field="*{name}" required placeholder="Örn: 1960 Rolex Saat">
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Kategori *</label>
                         <select class="form-select" th:field="*{type}" required>
                             <option value="Kitap">Kitap</option>
-                            <option value="Saat">Saat</option>
+                            <option value="Lego">Lego</option>
+                            <option value="Ayakkabı">Ayakkabı</option>
+                            <option value="Pul">Pul</option>
+                            <option value="Plak">Plak</option>
                             <option value="Antika">Antika</option>
                             <option value="Sanat">Sanat Eseri</option>
                             <option value="Diğer">Diğer</option>
                         </select>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Açıklama / Hikayesi</label>
                         <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Bu nadide parçanın hikayesi nedir?"></textarea>
                     </div>
-                    <div class="mb-4 p-3 rounded" style="background-color: #252525; border: 1px dashed #555;">
-                        <label class="form-label text-warning">Satış Fiyatı (İsteğe Bağlı)</label>
-                        <small class="d-block text-muted mb-2">Eğer ürünü ileride satmayı düşünüyorsan bir fiyat belirtebilirsin. Şimdilik sadece koleksiyonda duracaksa boş bırak.</small>
-                        <input type="number" step="0.01" class="form-control" th:field="*{startingPrice}" placeholder="Örn: 1500.00">
+
+                    <div class="mb-4 price-section">
+                        <label class="form-label d-block" style="color: #ff8c00;">
+                            <i class="bi bi-tag-fill me-1"></i> Satış Fiyatı (İsteğe Bağlı)
+                        </label>
+                        <small class="d-block text-white-50 mb-3" style="font-size: 0.8rem;">
+                            Eğer ürünü ileride satmayı düşünüyorsan bir fiyat belirtebilirsin. Sadece sergilenecekse boş bırak.
+                        </small>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-warning">₺</span>
+                            <input type="number" step="0.01" class="form-control" th:field="*{startingPrice}" placeholder="Örn: 1500.00">
+                        </div>
                     </div>
+
                     <div class="mb-4">
                         <label class="form-label">Ürün Görseli Yükle *</label>
                         <input type="file" class="form-control" name="imageFile" required accept="image/*">
+                        <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Desteklenen formatlar: JPG, PNG, WEBP</small>
                     </div>
-                    <button type="submit" class="btn btn-success w-100 fw-bold py-2">Koleksiyonuma Ekle</button>
+
+                    <button type="submit" class="btn btn-add-item w-100">
+                        <i class="bi bi-box-seam me-2"></i>Koleksiyonuma Ekle
+                    </button>
                 </form>
             </div>
         </div>

@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,11 +33,13 @@ public class UserController {
     public String listAllUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("currentUser", getLoggedInUser());
+        model.addAttribute("title", "Koleksiyoncular Topluluğu");
         return "users";
     }
 
     // PROFİL SAYFASI (Kendisi veya Başkası)
     @GetMapping("/profile/{username}")
+    @Transactional(readOnly = true)
     public String showProfile(@PathVariable String username, Model model) {
         User targetUser = userService.findByUsername(username);
         User currentUser = getLoggedInUser();
@@ -50,6 +53,36 @@ public class UserController {
 
         return "profile";
     }
+
+    // --- YENİ EKLENEN TAKİPÇİ LİSTELEME METODLARI (404 HATASINI ÇÖZER) ---
+
+    // TAKİPÇİLERİ GÖRÜNTÜLEME
+    @GetMapping("/profile/{username}/followers")
+    @Transactional(readOnly = true)
+    public String showFollowers(@PathVariable String username, Model model) {
+        User targetUser = userService.findByUsername(username);
+        if (targetUser == null) return "redirect:/items";
+
+        // ÖNEMLİ:users.html içindeki döngü "users" ismini kullandığı için burası "users" olmalı
+        model.addAttribute("users", targetUser.getFollowers());
+        model.addAttribute("currentUser", getLoggedInUser());
+        model.addAttribute("title", username + " - Takipçiler");
+        return "users";
+    }// Takip edilenleri görüntüleme
+    @GetMapping("/profile/{username}/following")
+    @Transactional(readOnly = true)
+    public String showFollowing(@PathVariable String username, Model model) {
+        User targetUser = userService.findByUsername(username);
+        if (targetUser == null) return "redirect:/items";
+
+        // ÖNEMLİ: Burası da "users" olmalı
+        model.addAttribute("users", targetUser.getFollowing());
+        model.addAttribute("currentUser", getLoggedInUser());
+        model.addAttribute("title", username + " - Takip Edilenler");
+        return "users";
+    }
+
+    // ------------------------------------------------------------------
 
     // PROFİL DÜZENLEME FORMU
     @GetMapping("/profile/edit")
@@ -92,6 +125,7 @@ public class UserController {
 
     // TAKİP ETME / TAKİPTEN ÇIKMA MANTIĞI
     @PostMapping("/follow/{username}")
+    @Transactional
     public String followUser(@PathVariable String username) {
         User currentUser = getLoggedInUser();
         User targetUser = userService.findByUsername(username);

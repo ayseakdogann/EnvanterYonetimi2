@@ -16,10 +16,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Kayıt ve giriş sayfaları herkese açık
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
+                        // ÖNEMLİ: /arkaplan.png buraya eklendi, böylece giriş yapmadan görülebilir
+                        .requestMatchers("/login", "/register", "/arkaplan.png", "/css/**", "/js/**").permitAll()
+
                         // Admin paneline sadece admin girebilir
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         // Kalan tüm sayfalar için giriş zorunlu
                         .anyRequest().authenticated()
                 )
@@ -38,6 +40,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Şifreleri veritabanında güvenli hale getirir
+        return new BCryptPasswordEncoder();
     }
 }

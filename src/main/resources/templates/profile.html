@@ -2,70 +2,272 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${user.username} + ' Profili'"></title>
+    <title th:text="${user.username} + ' Profili | Koleksiyon Ağı'"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #487fd0; color: #e0e0e0; }
-        .navbar { background-color: #487fd0 !important; border-bottom: 2px solid #198754; }
-        .profile-header { background: #487fd0; border-radius: 20px; border: 1px solid #333; padding: 40px; position: relative; }
-        .profile-img { width: 150px; height: 150px; object-fit: cover; border: 4px solid #198754; }
-        .info-badge { background: #2d2d2d; border-radius: 10px; padding: 5px 15px; margin-right: 10px; border: 1px solid #444; }
+        body {
+            background: radial-gradient(circle at top, #2c2c2c 0%, #000000 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+        }
+/* Takip Et (Kırmızı Dolu) */
+.btn-follow {
+    background: #ff0000;
+    border: none;
+    color: white;
+    font-weight: 700;
+    border-radius: 15px;
+    padding: 12px 25px;
+    transition: 0.3s;
+}
+
+/* Takibi Bırak (Turuncu Çerçeve) */
+.btn-unfollow {
+    background: transparent;
+    border: 2px solid #ff8c00;
+    color: #ff8c00;
+    font-weight: 700;
+    border-radius: 15px;
+    padding: 10px 23px;
+    transition: 0.3s;
+}
+
+.btn-follow:hover, .btn-unfollow:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+        .navbar-brand {
+            font-weight: 800;
+            color: #ff0000 !important;
+            letter-spacing: 1px;
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 50px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::after {
+            content: "";
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 300px; height: 300px;
+            background: rgba(255, 0, 0, 0.1);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .profile-img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border: 5px solid #ff0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .default-avatar {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #ff0000 0%, #b30000 100%);
+            font-size: 75px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+        }
+
+        .username-title {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bio-text {
+            color: #ccc;
+            font-size: 1.1rem;
+            font-style: italic;
+            max-width: 500px;
+        }
+
+        /* Sayıların tıklanabilir olması için eklenen stiller */
+        .stat-link {
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .stat-badge {
+            background: rgba(255, 140, 0, 0.1);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: #ff8c00;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .stat-link:hover .stat-badge {
+            background: rgba(255, 140, 0, 0.2);
+            border-color: #ff8c00;
+            transform: translateY(-3px);
+        }
+
+        .stat-badge strong {
+            display: block;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            font-weight: 700;
+            border-radius: 15px;
+            padding: 12px 25px;
+            transition: 0.3s;
+        }
+
+        .btn-edit:hover {
+            background: #ff0000;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .section-title {
+            color: #ff8c00;
+            font-weight: 800;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .item-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #ff0000;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .item-img {
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 10px;
+        }
+
+        .item-name {
+            color: #ff8c00;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/items}">📚 Koleksiyon Ağı</a>
+        <a class="navbar-brand" th:href="@{/items}">✨ Koleksiyon Ağı</a>
         <div class="ms-auto d-flex align-items-center">
-            <a class="nav-link text-light me-3" th:href="@{/users}">👥 Topluluk</a>
-            <a th:href="@{/items}" class="btn btn-outline-light btn-sm me-2">Pazara Dön</a>
-            <a class="btn btn-danger btn-sm" th:href="@{'/login?logout'}">Çıkış</a>
+            <a class="nav-link text-light me-4" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a>
+            <a th:href="@{/items}" class="btn btn-outline-light btn-sm me-3 px-3 rounded-pill">Pazara Dön</a>
+            <form th:action="@{/login?logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm px-4 rounded-pill">Çıkış</button>
+            </form>
         </div>
     </div>
 </nav>
 
-<div class="container mt-5">
-    <div class="profile-header shadow-lg mb-5">
+<div class="container">
+    <div class="profile-header">
         <div class="row align-items-center">
             <div class="col-md-3 text-center">
                 <img th:if="${user.profileImage != null}" th:src="@{'/profile/image/' + ${user.username}}" class="profile-img rounded-circle mb-3">
-                <div th:unless="${user.profileImage != null}" class="mx-auto bg-success text-white rounded-circle d-flex align-items-center justify-content-center mb-3 fw-bold" style="width: 150px; height: 150px; font-size: 60px;">
+                <div th:unless="${user.profileImage != null}" class="default-avatar mx-auto text-white rounded-circle d-flex align-items-center justify-content-center mb-3 fw-bold">
                     <span th:text="${user.username.substring(0,1).toUpperCase()}"></span>
                 </div>
             </div>
             <div class="col-md-6">
-                <h1 class="fw-bold text-white mb-2" th:text="${user.username}"></h1>
-                <div class="mb-3">
-                    <span th:if="${user.city}" class="info-badge">📍 <span th:text="${user.city}"></span></span>
-                    <span th:if="${user.birthDate}" class="info-badge">🎂 <span th:text="${user.birthDate}"></span></span>
-                </div>
-                <p class="text-muted italic" th:text="${user.bio != null ? user.bio : 'Henüz bir biyografi eklenmemiş.'}"></p>
-                <div class="d-flex gap-4 mt-3">
-                    <span><strong class="text-white" th:text="${user.followers.size()}"></strong> Takipçi</span>
-                    <span><strong class="text-white" th:text="${user.following.size()}"></strong> Takip</span>
-                </div>
-            </div>
-            <div class="col-md-3 text-md-end">
-                <a th:if="${currentUser.id == user.id}" th:href="@{/profile/edit}" class="btn btn-outline-success w-100 mb-2 fw-bold">⚙️ Profili Düzenle</a>
-                <form th:if="${currentUser.id != user.id}" th:action="@{'/follow/' + ${user.username}}" method="post">
-                    <button type="submit" th:class="${isFollowing ? 'btn btn-outline-secondary w-100' : 'btn btn-success w-100 fw-bold'}"
-                            th:text="${isFollowing ? 'Takibi Bırak' : 'Takip Et'}"></button>
-                </form>
-            </div>
-        </div>
-    </div>
+                <h1 class="username-title" th:text="${user.username}">nimet</h1>
+                <p class="bio-text mt-2" th:text="${user.bio != null ? user.bio : 'Henüz bir biyografi eklenmemiş.'}"></p>
 
-    <h4 class="fw-bold text-white mb-4 border-bottom border-secondary pb-2">🖼️ Koleksiyon Sergisi</h4>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
+                <!-- Tıklanabilir hale getirilen istatistik bölümü -->
+                <div class="d-flex gap-3 mt-4">
+                    <a th:href="@{'/profile/' + ${user.username} + '/followers'}" class="stat-link">
+                        <div class="stat-badge">
+                            <strong th:text="${user.followers.size()}">0</strong> Takipçi
+                        </div>
+                    </a>
+                    <a th:href="@{'/profile/' + ${user.username} + '/following'}" class="stat-link">
+                        <div class="stat-badge">
+                            <strong th:text="${user.following.size()}">0</strong> Takip
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-3 text-md-end text-center mt-4 mt-md-0">
+
+                <a th:if="${currentUser.id == user.id}" th:href="@{/profile/edit}" class="btn btn-edit">
+                    <i class="bi bi-gear-fill me-2"></i> Profili Düzenle
+                </a>
+
+                <div th:if="${currentUser.id != user.id}">
+                    <form th:action="@{'/follow/' + ${user.username}}" method="post">
+                        <button type="submit" th:class="${isFollowing ? 'btn-unfollow' : 'btn-follow'}">
+                            <i th:class="${isFollowing ? 'bi bi-person-dash-fill me-2' : 'bi bi-person-plus-fill me-2'}"></i>
+                            <span th:text="${isFollowing ? 'Takibi Bırak' : 'Takip Et'}"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+    <h3 class="section-title">🖼️ Koleksiyon Sergisi</h3>
+
+    <div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
         <div class="col" th:each="item : ${items}">
-            <div class="card bg-dark border-secondary h-100 shadow-sm overflow-hidden" style="border-radius: 15px;">
-                <img th:src="@{'/items/image/' + ${item.id}}" class="card-img-top" style="height: 180px; object-fit: contain; background: #000;">
-                <div class="card-body p-2 text-center">
-                    <a th:href="@{'/items/' + ${item.id}}" class="text-white text-decoration-none small" th:text="${item.name}"></a>
+            <div class="card item-card h-100 p-2">
+                <img th:src="@{'/items/image/' + ${item.id}}" class="item-img shadow-sm">
+                <div class="card-body text-center">
+                    <a th:href="@{'/items/' + ${item.id}}" class="item-name stretched-link" th:text="${item.name}">lego çiçek</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 </body>
 </html>

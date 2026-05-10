@@ -3,6 +3,7 @@ package com.koleksiyon.envanter.service;
 import com.koleksiyon.envanter.entity.User;
 import com.koleksiyon.envanter.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,12 +14,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collections;
 
 import java.util.ArrayList;
+import com.koleksiyon.envanter.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    @Autowired
     private final PasswordEncoder passwordEncoder;
 
     // 1. Spring Security'nin giriş yaparken kullanıcıyı veritabanında bulması için gereken zorunlu metot
@@ -56,10 +60,12 @@ public class UserService implements UserDetailsService {
             userRepository.save(admin);
         }
     }
+    @Transactional
     public void updateUser(User user) {
         userRepository.save(user);
     }
     public java.util.List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
 }

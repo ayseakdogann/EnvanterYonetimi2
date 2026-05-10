@@ -2,54 +2,209 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Koleksiyonum</title>
+    <title>Koleksiyonum | Koleksiyon Ağı</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #487fd0; color: #e0e0e0; }
-        .navbar { background-color: #487fd0 !important; border-bottom: 2px solid #198754; }
-        .collection-card { background: #1e1e1e; border: 1px solid #333; border-radius: 15px; overflow: hidden; transition: 0.3s; }
-        .item-img { height: 250px; width: 100%; object-fit: contain; background: #487fd0; }
-        .profile-btn { border-radius: 20px; transition: 0.3s; border: 1px solid transparent; }
-        .profile-btn:hover { border-color: #198754; background: rgba(25, 135, 84, 0.1); }
+        body {
+            background: radial-gradient(circle at center, #1e1e1e 0%, #000000 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Navbar: Şeffaf ve Buzlu */
+        .navbar {
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: #ff0000 !important;
+            letter-spacing: 1px;
+        }
+
+        /* Koleksiyon Kartları: Glassmorphism */
+        .collection-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .collection-card:hover {
+            transform: translateY(-10px);
+            border-color: #ff0000;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .item-img {
+            height: 250px;
+            width: 100%;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+        }
+
+        /* Başlıklar ve Yazılar */
+        .page-title {
+            color: #ff8c00;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        /* Satıldı Yazısı Stili */
+.sold-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    border: 4px solid #ff0000;
+    padding: 5px 20px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 5;
+}
+
+.sold-text {
+    color: #ff0000;
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+/* Silme butonu hover efekti */
+.btn-danger:hover {
+    transform: scale(1.1);
+    background-color: #ff0000 !important;
+}
+
+        /* Butonlar */
+        .btn-add {
+            background-color: #ff0000;
+            border: none;
+            font-weight: bold;
+            color: white;
+            border-radius: 12px;
+            padding: 10px 20px;
+        }
+
+        .btn-add:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
+
+        .btn-market {
+            background-color: #ff8c00;
+            border: none;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .btn-market:hover {
+            background-color: #e67e00;
+            color: #000;
+        }
+
+        .profile-nav-btn {
+            color: #ff8c00 !important;
+            font-weight: 600;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 15px;
+        }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4 shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/items}">📚 Koleksiyon Ağı</a>
+        <a class="navbar-brand fw-bold" th:href="@{/items}">✨ Koleksiyon Ağı</a>
         <div class="ms-auto d-flex align-items-center">
-            <a class="nav-link text-light me-3" th:href="@{/users}">👥 Topluluk</a>
-            <a th:href="@{'/profile/' + ${currentUser.username}}" class="nav-link text-white profile-btn px-3 me-2">
-                <span class="me-1">👤</span><span th:text="${currentUser.username}"></span>
+            <a class="nav-link text-light me-4" th:href="@{/users}"><i class="bi bi-people-fill"></i> Topluluk</a>
+
+            <!-- Hata Önleyici: currentUser null kontrolü -->
+            <a th:if="${currentUser != null}" th:href="@{'/profile/' + ${currentUser.username}}" class="nav-link profile-nav-btn px-3 me-3">
+                <i class="bi bi-person-circle"></i> <span th:text="${currentUser.username}"></span>
             </a>
-            <a class="btn btn-danger btn-sm" th:href="@{'/login?logout'}">Çıkış</a>
+
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4">Çıkış</button>
+            </form>
         </div>
     </div>
 </nav>
 
 <div class="container pb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-white">✨ Benim Hazinem</h2>
-        <a th:href="@{/items/add}" class="btn btn-success fw-bold">+ Yeni Parça Ekle</a>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="page-title">✨ Benim Hazinem</h2>
+        <a th:href="@{/items/add}" class="btn btn-add shadow-sm">
+            <i class="bi bi-plus-lg"></i> Yeni Parça Ekle
+        </a>
     </div>
 
+    <!-- Hata Mesajı Alanı (Eğer controller'dan hata gelirse) -->
+    <div th:if="${errorMessage}" class="alert alert-danger text-center rounded-4 mb-4"
+         style="background: rgba(220, 53, 69, 0.2); color: #ff99a2; border: 1px solid rgba(220, 53, 69, 0.3);">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+    </div>
     <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col" th:each="item : ${items}">
-            <div class="card h-100 collection-card shadow-lg">
-                <img th:src="@{'/items/image/' + ${item.id}}" class="item-img">
+            <div class="card h-100 collection-card shadow-lg position-relative">
+
+
+                <a th:href="@{'/items/delete/' + ${item.id}}"
+                   class="btn btn-danger btn-sm rounded-circle shadow"
+                   style="position: absolute; top: 10px; right: 10px; z-index: 20; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
+                   onclick="return confirm('Bu eşsiz parçayı koleksiyonundan silmek istediğine emin misin?');">
+                    <i class="bi bi-trash3-fill"></i>
+                </a>
+                <div class="position-relative">
+                    <img th:src="@{'/items/image/' + ${item.id}}" class="item-img"
+                         th:style="${item.isSold} ? 'filter: grayscale(80%) brightness(50%);' : ''">
+
+                    <div th:if="${item.isSold}" class="sold-overlay">
+                        <span class="sold-text">SATILDI</span>
+                    </div>
+                </div>
+
                 <div class="card-body d-flex flex-column">
-                    <h5 class="fw-bold text-white" th:text="${item.name}"></h5>
-                    <p class="text-muted small" th:text="${item.description}"></p>
+                    <h5 class="fw-bold text-white mb-1" th:text="${item.name}"></h5>
+                    <span class="badge mb-2" style="background: rgba(255,255,255,0.1); width: fit-content;" th:text="${item.type}"></span>
+                    <p class="text-white-50 small text-truncate" th:text="${item.description}"></p>
+
                     <div class="mt-auto">
-                        <form th:if="${!item.forSale}" th:action="@{'/items/list-for-sale/' + ${item.id}}" method="post">
-                            <button type="submit" class="btn btn-primary w-100 fw-bold">🚀 Pazara Çıkar ve Sat</button>
+                        <form th:if="${!item.isSold and !item.forSale}" th:action="@{'/items/list-for-sale/' + ${item.id}}" method="post">
+                            <button type="submit" class="btn btn-market w-100 fw-bold">
+                                <i class="bi bi-rocket-takeoff-fill me-2"></i>Pazara Çıkar
+                            </button>
                         </form>
-                        <a th:if="${item.forSale}" th:href="@{'/items/' + ${item.id}}" class="btn btn-outline-info w-100">İlanı Gör</a>
+
+                        <div th:if="${item.isSold}" class="alert alert-secondary py-2 mb-0 text-center rounded-3">
+                            <i class="bi bi-check-all me-1"></i> Bu parça el değiştirdi.
+                        </div>
+
+                        <a th:if="${item.forSale and !item.isSold}" th:href="@{'/items/' + ${item.id}}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-eye me-1"></i> İlanı Gör
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Eğer koleksiyon boşsa -->
+    <div th:if="${items == null or #lists.isEmpty(items)}" class="text-center py-5 opacity-50">
+        <i class="bi bi- safe2" style="font-size: 4rem; color: #ff8c00;"></i>
+        <p class="fs-4 mt-3">Hazine sandığın henüz boş görünüyor...</p>
+    </div>
 </div>
+
 </body>
 </html>

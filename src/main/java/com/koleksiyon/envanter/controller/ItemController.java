@@ -110,18 +110,30 @@ public class ItemController {
     }
 
     // 7. SİLME (Admin veya Sahibi silebilir)
-    @GetMapping("/delete/{id}")
+    // 7. SİLME (Admin veya Sahibi silebilir)
+    // Sınıf başında /items olduğu için buraya sadece /delete/{id} yazıyoruz.
+    @RequestMapping(value = "/delete/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    @Transactional
     public String deleteItem(@PathVariable Long id) {
         Item item = itemService.getItemById(id);
         User currentUser = getLoggedInUser();
 
+        if (item == null) {
+            return "redirect:/my-collection";
+        }
+
+        // Yetki Kontrolü
         if (currentUser.getRole().equals("ROLE_ADMIN") ||
                 item.getOwner().getUsername().equals(currentUser.getUsername())) {
-            itemService.deleteItem(id);
-        }
-        return "redirect:/items";
-    }
 
+            itemService.deleteItem(id);
+
+            // Sildikten sonra koleksiyonuma dön
+            return "redirect:/my-collection";
+        }
+
+        return "redirect:/items?error=unauthorized";
+    }
     // 8. RESİM GETİRME
     @GetMapping("/image/{id}")
     @ResponseBody

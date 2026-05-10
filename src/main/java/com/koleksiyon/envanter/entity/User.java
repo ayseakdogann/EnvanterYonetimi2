@@ -1,20 +1,26 @@
 package com.koleksiyon.envanter.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode; // Yeni eklendi
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter // @Data yerine tek tek eklendi
+@Setter
 @NoArgsConstructor
+// ÖNEMLİ: hashCode ve equals metotlarında sadece ID'yi kullan, koleksiyonları dahil etme!
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include // Sadece bu alan baz alınacak
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -24,9 +30,8 @@ public class User {
     private String password;
 
     private String email;
-    private String role; // ROLE_USER veya ROLE_ADMIN
+    private String role;
 
-    // Sosyal Profil Alanları
     @Column(length = 500)
     private String bio;
 

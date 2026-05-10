@@ -1,11 +1,14 @@
 package com.koleksiyon.envanter.service;
 
+import com.koleksiyon.envanter.entity.Bid;
 import com.koleksiyon.envanter.entity.Item;
 import com.koleksiyon.envanter.entity.SystemVault;
+import com.koleksiyon.envanter.repository.BidRepository;
 import com.koleksiyon.envanter.repository.ItemRepository;
 import com.koleksiyon.envanter.repository.SystemVaultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.koleksiyon.envanter.entity.User;
 
@@ -18,7 +21,7 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final SystemVaultRepository systemVaultRepository;
-
+    private final BidRepository bidRepository;
     // 1. Tüm parçaları listeleme (Read)
     public List<Item> getAllItems() {
         return itemRepository.findAll();
@@ -80,16 +83,29 @@ public class ItemService {
     }
 
     // Teklif Verme Metodu
+    @Transactional
     public void placeBid(Long itemId, Double amount, User bidder) {
-        Item item = getItemById(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
 
-        // Teklifin başlangıç fiyatından ve mevcut en yüksek tekliften büyük olması gerekir
-        if (amount <= item.getStartingPrice() || (item.getCurrentHighestBid() != null && amount <= item.getCurrentHighestBid())) {
-            throw new IllegalArgumentException("Teklif miktarı mevcut fiyattan yüksek olmalıdır!");
+        // Mevcut fiyat kontrolü
+        Double currentPrice = item.getCurrentHighestBid() != null ?
+                item.getCurrentHighestBid() : item.getStartingPrice();
+
+        if (amount > currentPrice) {
+            // Teklif nesnesini oluştur ve kaydet
+            Bid bid = new Bid();
+            bid.setItem(item);
+            bid.setBidder(bidder);
+            bid.setAmount(amount);
+
+            // İşte burada bidRepository'yi kullanabilirsin
+            bidRepository.save(bid);
+
+            // Ürünün en yüksek teklif bilgisini güncelle
+            item.setCurrentHighestBid(amount);
+            itemRepository.save(item);
         }
-
-        item.setCurrentHighestBid(amount);
-        itemRepository.save(item);
     }
 
     // Sadece satışta olanları getiren temel metot
@@ -110,11 +126,10 @@ public class ItemService {
     }
 
     // Kullanıcının koleksiyonundaki (satılık olsun olmasın) her şeyi getirmek için
+    @Transactional(readOnly = true)
     public List<Item> getItemsByOwner(User owner) {
-        // Bunun için Repository'ye List<Item> findByOwner(User owner); eklemen gerekebilir.
-        return itemRepository.findAll().stream()
-                .filter(item -> item.getOwner().equals(owner))
-                .toList();
+        // Tüm listeyi çekip filtrelemek yerine direkt sahibine göre iste
+        return itemRepository.findByOwner(owner);
     }
 
 }
