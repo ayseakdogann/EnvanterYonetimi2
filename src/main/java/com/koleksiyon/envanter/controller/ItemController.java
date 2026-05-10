@@ -59,10 +59,15 @@ public class ItemController {
     // ürün ekleme formu
     @GetMapping("/add")
     public String showAddForm(Model model) {
-        if (getLoggedInUser().getRole().equals("ROLE_ADMIN")) {
+        User currentUser = getLoggedInUser();
+
+        // Adminlerin ürün eklemesini engelleme kontrolü
+        if (currentUser.getRole().equals("ROLE_ADMIN")) {
             return "redirect:/items?error=admin_cannot_add";
         }
+
         model.addAttribute("itemDTO", new ItemDTO());
+        model.addAttribute("currentUser", currentUser);
         return "item-form";
     }
 

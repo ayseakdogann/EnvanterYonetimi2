@@ -253,7 +253,7 @@
                     <i class="bi bi-gear-fill me-2"></i> Profili Düzenle
                 </a>
 
-                <div th:if="${currentUser.id != user.id}">
+                <div th:if="${currentUser.id != user.id and currentUser.role != 'ROLE_ADMIN'}">
                     <form th:action="@{'/follow/' + ${user.username}}" method="post">
                         <button type="submit" th:class="${isFollowing ? 'btn-unfollow' : 'btn-follow'}">
                             <i th:class="${isFollowing ? 'bi bi-person-dash-fill me-2' : 'bi bi-person-plus-fill me-2'}"></i>

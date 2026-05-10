@@ -107,7 +107,6 @@
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
                     <li><a class="dropdown-item" th:href="@{'/profile/' + ${currentUser.username}}">Profilim</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><span class="dropdown-item text-success fw-bold"><i class="bi bi-wallet2 me-1"></i> Cüzdan: <span th:text="${currentUser.balance != null ? currentUser.balance : 0.0}"></span> ₺</span></li>
                     <li><a class="dropdown-item text-danger" th:href="@{/login?logout}">Çıkış Yap</a></li>
                 </ul>
             </div>
@@ -142,6 +141,7 @@
                     <i class="bi bi-clock-history me-1"></i> Eklendi: <span th:text="${#temporals.format(item.createdAt, 'dd MMMM yyyy')}"></span>
                 </small>
             </div>
+
             <!-- Admin veya Ürün Sahibi İçin Silme Butonu -->
             <div th:if="${currentUser.role == 'ROLE_ADMIN'}" class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4">
                 <h6 class="fw-bold text-dark"><i class="bi bi-shield-lock-fill me-2"></i>Yönetici İşlemleri</h6>
@@ -189,7 +189,29 @@
             </div>
 
             <div th:if="${!item.isSold and item.owner.username != currentUser.username and currentUser.role != 'ROLE_ADMIN'}" class="mb-5">
+
+                <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center mb-3 shadow-sm"
+                     style="background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; color: #ff6666; border-radius: 12px;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div th:text="${errorMessage}"></div>
+                </div>
+
+                <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center mb-3 shadow-sm"
+                     style="background: rgba(40, 167, 69, 0.1); border: 1px solid #28a745; color: #75ec8d; border-radius: 12px;">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <div th:text="${successMessage}"></div>
+                </div>
+
                 <form th:action="@{'/items/bid/' + ${item.id}}" method="post">
+                    <div class="input-group mb-2 shadow-lg">
+                        <span class="input-group-text border-0 fw-bold">₺</span>
+                        <input type="number" step="any" name="amount"
+                               th:min="${item.currentHighestBid != null ? item.currentHighestBid + 1 : item.startingPrice + 1}"
+                               class="form-control border-0"
+                               placeholder="Daha yüksek bir teklif yazın..." required>
+                        <button type="submit" class="btn btn-bid px-5 text-uppercase">Teklif Ver</button>
+                    </div>
+                    <small class="text-white-50"><i class="bi bi-info-circle me-1"></i> Teklifiniz mevcut fiyattan en az 1 ₺ yüksek olmalıdır.</small>
                 </form>
             </div>
 
