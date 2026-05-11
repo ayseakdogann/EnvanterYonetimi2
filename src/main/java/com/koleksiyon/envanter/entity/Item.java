@@ -26,7 +26,7 @@ public class Item {
     @Column(length = 5000)
     private String description;
 
-    @Lob
+    @Lob //büyük boyutlu resimlerin saklanacagını belirtir
     @JdbcTypeCode(Types.VARBINARY) // 'lob stream' hatasını önlemek için veriyi doğrudan binary olarak saklar
     @Column(name = "image")
     private byte[] image;
