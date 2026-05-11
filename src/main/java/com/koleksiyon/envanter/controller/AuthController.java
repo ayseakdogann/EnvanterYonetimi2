@@ -1,8 +1,11 @@
 package com.koleksiyon.envanter.controller;
 
+import com.koleksiyon.envanter.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
@@ -17,14 +20,14 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String showRegisterForm(org.springframework.ui.Model model) {
+    public String showRegisterForm(Model model) {
         model.addAttribute("user", new com.koleksiyon.envanter.entity.User());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@org.springframework.web.bind.annotation.ModelAttribute("user") com.koleksiyon.envanter.entity.User user) {
-        userService.saveUser(user);
+    public String registerUser(@ModelAttribute("user") User user) { //HTML formunda kullanıcının girdiği ad, e-posta, şifre gibi bilgileri alır ve otomatik olarak bizim Java'daki User nesnemizin içine doldurur
+        userService.saveUser(user); //İçi dolan bu kullanıcı nesnesini alır ve veritabanına kaydetmesi için UserService'e yollar.
         return "redirect:/login?registered=true";
     }
 }

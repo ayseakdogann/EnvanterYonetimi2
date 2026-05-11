@@ -23,11 +23,6 @@ public class ItemService {
     private final BidRepository bidRepository;
     private final com.koleksiyon.envanter.repository.UserRepository userRepository;
 
-    // Tüm parçaları listeleme (Read)
-    public List<Item> getAllItems() {
-        return itemRepository.findAll();
-    }
-
     // Yeni parça ekleme (Create)
     public void saveItem(Item item, MultipartFile file) throws IOException {
         // Eğer kullanıcı bir dosya yüklediyse ve dosya boş değilse
@@ -54,14 +49,6 @@ public class ItemService {
 
         //Bağlı teklifler silindikten sonra artık ürünü güvenle silebiliriz
         itemRepository.deleteById(id);
-    }
-
-    // Dinamik arama işlemi
-    public List<Item> searchItems(String keyword) {
-        if (keyword != null && !keyword.isEmpty()) {
-            return itemRepository.findByNameContainingIgnoreCase(keyword);
-        }
-        return itemRepository.findAll();
     }
 
     // SATIŞI TAMAMLAMA VE KOMİSYON KESME METODU
@@ -143,11 +130,13 @@ public class ItemService {
         }
         return itemRepository.findByForSaleTrue();
     }
+
     @Transactional
     public void deleteBidsByUserId(Long userId) {
         // BidRepository üzerinden kullanıcıya ait teklifleri siler
         bidRepository.deleteByUserId(userId);
     }
+
     // Kullanıcının koleksiyonundaki (satılık olsun olmasın) her şeyi getirmek için
     @Transactional(readOnly = true)
     public List<Item> getItemsByOwner(User owner) {

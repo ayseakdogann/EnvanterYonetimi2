@@ -139,6 +139,15 @@
         <i class="bi bi-people-fill"></i>
         <span th:text="${title != null ? title : 'Koleksiyoncular Topluluğu'}"></span>
     </h3>
+    <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center mb-4 shadow-sm" style="background: rgba(40, 167, 69, 0.1); border: 1px solid #28a745; color: #75ec8d; border-radius: 12px;">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <div th:text="${successMessage}"></div>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center mb-4 shadow-sm" style="background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; color: #ff6666; border-radius: 12px;">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div th:text="${errorMessage}"></div>
+    </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         <div class="col" th:each="user : ${users}">
@@ -161,6 +170,15 @@
                 <p class="small text-white-50 mb-3">Koleksiyoncu</p>
 
                 <a th:href="@{'/profile/' + ${user.username}}" class="btn btn-profile-view w-100">Profili Gör</a>
+                <form th:if="${currentUser.role == 'ROLE_ADMIN'}"
+                      th:action="@{'/admin/delete-user/' + ${user.username}}"
+                      method="post" class="mt-2 w-100"
+                      onsubmit="return confirm('DİKKAT! Bu kullanıcıyı, ürünlerini ve tekliflerini tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz!');">
+
+                    <button type="submit" class="btn btn-danger w-100" style="border-radius: 15px; font-weight: bold;">
+                        <i class="bi bi-trash3-fill"></i> Sil
+                    </button>
+                </form>
             </div>
         </div>
     </div>

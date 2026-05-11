@@ -15,7 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // ÖNEMLİ: /arkaplan.png buraya eklendi, böylece giriş yapmadan görülebilir
+                        // /arkaplan.png buraya eklendi, böylece giriş yapmadan görülebilir
                         .requestMatchers("/login", "/register", "/arkaplan.png", "/css/**", "/js/**").permitAll()
 
                         // Admin paneline sadece admin girebilir

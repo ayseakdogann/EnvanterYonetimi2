@@ -55,15 +55,18 @@ public class ItemController {
         model.addAttribute("currentUser", getLoggedInUser());
         return "index";
     }
+
     // ÜRÜN DÜZENLEME FORMU
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         Item item = itemService.getItemById(id);
         User currentUser = getLoggedInUser();
 
-        // Güvenlik: Sadece sahibi veya admin düzenleyebilir (Genelde sadece sahibi)
-        if (!item.getOwner().getUsername().equals(currentUser.getUsername())) {
-            return "redirect:/my-collection?error=unauthorized";
+        boolean isOwner = item.getOwner().getUsername().equals(currentUser.getUsername());
+        boolean isAdmin = currentUser.getRole().equals("ROLE_ADMIN");
+
+        if (!isOwner && !isAdmin) {
+            return "redirect:/items?error=unauthorized";
         }
 
         // Mevcut ürünü DTO'ya çevirip forma gönderiyoruz
@@ -72,7 +75,6 @@ public class ItemController {
         itemDTO.setType(item.getType());
         itemDTO.setDescription(item.getDescription());
         itemDTO.setStartingPrice(item.getStartingPrice());
-        // id bilgisini HTML'de action oluşturmak için modele ayrıca ekleyelim
 
         model.addAttribute("itemDTO", itemDTO);
         model.addAttribute("itemId", id); // Güncelleme için ID gerekli
@@ -88,21 +90,31 @@ public class ItemController {
         Item existingItem = itemService.getItemById(id);
         User currentUser = getLoggedInUser();
 
-        if (existingItem.getOwner().getUsername().equals(currentUser.getUsername())) {
+        boolean isOwner = existingItem.getOwner().getUsername().equals(currentUser.getUsername());
+        boolean isAdmin = currentUser.getRole().equals("ROLE_ADMIN");
+
+        // Sahibi veya Admin ise güncellemeye izin ver
+        if (isOwner || isAdmin) {
             existingItem.setName(itemDTO.getName());
             existingItem.setType(itemDTO.getType());
             existingItem.setDescription(itemDTO.getDescription());
             existingItem.setStartingPrice(itemDTO.getStartingPrice());
 
-            // Eğer yeni bir resim yüklendiyse güncelle, yüklenmediyse eskisini koru
+            // Eğer yeni bir resim yüklendiyse güncelle
             if (itemDTO.getImageFile() != null && !itemDTO.getImageFile().isEmpty()) {
                 existingItem.setImage(itemDTO.getImageFile().getBytes());
             }
 
             itemRepository.save(existingItem);
         }
+
+        // Admin ise ürün detayına dön, Kullanıcı ise koleksiyonuna dön
+        if (isAdmin) {
+            return "redirect:/items/" + id + "?updated=true";
+        }
         return "redirect:/my-collection";
     }
+
     // ürün ekleme formu :)
     @GetMapping("/add")
     public String showAddForm(Model model) {
@@ -113,8 +125,6 @@ public class ItemController {
 
         model.addAttribute("itemDTO", new ItemDTO());
         model.addAttribute("currentUser", currentUser);
-
-        // BURASI ÇOK ÖNEMLİ: Yeni ekleme yaparken isEdit false olmalı
         model.addAttribute("isEdit", false);
 
         return "item-form";
@@ -157,6 +167,7 @@ public class ItemController {
     // ürün detay sayfası
     @GetMapping("/{id}")
     public String showItemDetails(@PathVariable Long id, Model model) {
+        //URL'den ürünün ID'sini @PathVariable ile alır, ürünü bulur ve item-details.html sayfasına gönderir.
         Item item = itemService.getItemById(id);
         model.addAttribute("item", item);
         model.addAttribute("currentUser", getLoggedInUser());
@@ -214,7 +225,7 @@ public class ItemController {
 
     // Satışı Onaylama ve Parayı Hesaba Aktarma
     @PostMapping("/close-auction/{id}")
-    public String closeAuction(@PathVariable Long id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String closeAuction(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             itemService.closeAuction(id, getLoggedInUser().getUsername());
             redirectAttributes.addFlashAttribute("successMessage", "Satış tamamlandı! Komisyon kesildikten sonra kalan tutar cüzdanınıza eklendi.");

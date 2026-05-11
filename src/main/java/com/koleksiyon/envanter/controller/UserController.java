@@ -35,10 +35,10 @@ public class UserController {
     @GetMapping("/users")
     public String listAllUsers(Model model) {
         List<User> normalUsers = userService.getAllUsers().stream()
-                .filter(u -> !u.getRole().equals("ROLE_ADMIN"))
+                .filter(u -> !u.getRole().equals("ROLE_ADMIN")) //Kullanıcılar admini topluluk listesinde göremiyor
                 .collect(java.util.stream.Collectors.toList());
 
-        model.addAttribute("users", normalUsers);
+        model.addAttribute("users", normalUsers); //adminleri çıkardığımız o kullanıcı listesini (normalUsers) alıyor ve kutunun üzerine "users" etiketini yapıştırarak HTML'e gönderiyor.
         model.addAttribute("currentUser", getLoggedInUser());
         model.addAttribute("title", "Koleksiyoncular Topluluğu");
         return "users";
@@ -203,5 +203,58 @@ public class UserController {
         model.addAttribute("items", itemService.getItemsByOwner(currentUser));
         model.addAttribute("currentUser", currentUser);
         return "my-collection";
+    }
+
+    // ADMİN İÇİN KULLANICI SİLME YETKİSİ
+    @PostMapping("/admin/delete-user/{username}")
+    @Transactional
+    public String deleteUserByAdmin(@PathVariable String username, RedirectAttributes redirectAttributes) {
+        User currentUser = getLoggedInUser();
+
+        //Sadece Admin bu işlemi yapabilir
+        if (!currentUser.getRole().equals("ROLE_ADMIN")) {
+            return "redirect:/items?error=unauthorized";
+        }
+
+        // Silinecek hedef kullanıcıyı bul
+        User targetUser = userService.findByUsername(username);
+        if (targetUser == null) {
+            return "redirect:/users";
+        }
+
+        //Admin yanlışlıkla kendi kendini silemesin!
+        if (targetUser.getUsername().equals(currentUser.getUsername())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Sistem yöneticisi kendi hesabını silemez!");
+            return "redirect:/users";
+        }
+
+        // Sosyal bağları kopar
+        for (User follower : targetUser.getFollowers()) {
+            follower.getFollowing().remove(targetUser);
+            userService.updateUser(follower);
+        }
+        for (User following : targetUser.getFollowing()) {
+            following.getFollowers().remove(targetUser);
+            userService.updateUser(following);
+        }
+        targetUser.getFollowers().clear();
+        targetUser.getFollowing().clear();
+        userService.updateUser(targetUser);
+
+        //Kullanıcıya ait tüm ürünleri (Item) sil
+        List<Item> userItems = itemService.getItemsByOwner(targetUser);
+        for (Item item : userItems) {
+            itemService.deleteItem(item.getId());
+        }
+
+        // Kullanıcının pazar yerinde verdiği tüm teklifleri (Bid) sil
+        itemService.deleteBidsByUserId(targetUser.getId());
+
+        // Son olarak kullanıcının kendisini veritabanından sil
+        userService.deleteUser(targetUser.getId());
+
+        // Admin'e bilgi ver
+        redirectAttributes.addFlashAttribute("successMessage", username + " adlı kullanıcı ve tüm verileri sistemden başarıyla silindi.");
+        return "redirect:/users";
     }
 }
