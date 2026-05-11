@@ -26,8 +26,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User user) { //HTML formunda kullanıcının girdiği ad, e-posta, şifre gibi bilgileri alır ve otomatik olarak bizim Java'daki User nesnemizin içine doldurur
-        userService.saveUser(user); //İçi dolan bu kullanıcı nesnesini alır ve veritabanına kaydetmesi için UserService'e yollar.
+    public String registerUser(@ModelAttribute("user") com.koleksiyon.envanter.entity.User user,
+                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        String password = user.getPassword();
+
+        // Şifre 6 karakterden kısa mı VEYA sadece rakamlardan oluşmuyor mu?
+        if (password.length() < 6 || !password.matches("\\d+")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Kayıt başarısız: Şifreniz en az 6 haneli olmalı ve sadece rakamlardan oluşmalıdır!");
+            return "redirect:/register"; // Hata varsa kayıt sayfasına geri yolla
+        }
+
+        userService.saveUser(user);
         return "redirect:/login?registered=true";
     }
 }

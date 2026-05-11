@@ -145,7 +145,12 @@
         </div>
         <div class="mb-4">
             <label class="form-label small">Şifre</label>
-            <input type="password" name="password" class="form-control" placeholder="Güçlü bir şifre oluşturun" required>
+            <input type="password" class="form-control" id="password" name="password"
+                   minlength="6"
+                   pattern="\d+"
+                   title="Şifreniz en az 6 haneli olmalı ve sadece rakamlardan (0-9) oluşmalıdır!"
+                   placeholder="••••••••"
+                   required>
         </div>
         <button type="submit" class="btn btn-register w-100 shadow-sm">Hesabı Oluştur</button>
     </form>
