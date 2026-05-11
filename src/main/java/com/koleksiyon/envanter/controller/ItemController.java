@@ -55,6 +55,7 @@ public class ItemController {
         model.addAttribute("currentUser", getLoggedInUser());
         return "index";
     }
+
     // ÜRÜN DÜZENLEME FORMU
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
@@ -103,6 +104,7 @@ public class ItemController {
         }
         return "redirect:/my-collection";
     }
+
     // ürün ekleme formu :)
     @GetMapping("/add")
     public String showAddForm(Model model) {
@@ -113,8 +115,6 @@ public class ItemController {
 
         model.addAttribute("itemDTO", new ItemDTO());
         model.addAttribute("currentUser", currentUser);
-
-        // BURASI ÇOK ÖNEMLİ: Yeni ekleme yaparken isEdit false olmalı
         model.addAttribute("isEdit", false);
 
         return "item-form";
@@ -157,6 +157,7 @@ public class ItemController {
     // ürün detay sayfası
     @GetMapping("/{id}")
     public String showItemDetails(@PathVariable Long id, Model model) {
+        //URL'den ürünün ID'sini @PathVariable ile alır, ürünü bulur ve item-details.html sayfasına gönderir.
         Item item = itemService.getItemById(id);
         model.addAttribute("item", item);
         model.addAttribute("currentUser", getLoggedInUser());
@@ -214,7 +215,7 @@ public class ItemController {
 
     // Satışı Onaylama ve Parayı Hesaba Aktarma
     @PostMapping("/close-auction/{id}")
-    public String closeAuction(@PathVariable Long id, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String closeAuction(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             itemService.closeAuction(id, getLoggedInUser().getUsername());
             redirectAttributes.addFlashAttribute("successMessage", "Satış tamamlandı! Komisyon kesildikten sonra kalan tutar cüzdanınıza eklendi.");

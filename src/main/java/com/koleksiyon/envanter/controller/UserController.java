@@ -35,10 +35,10 @@ public class UserController {
     @GetMapping("/users")
     public String listAllUsers(Model model) {
         List<User> normalUsers = userService.getAllUsers().stream()
-                .filter(u -> !u.getRole().equals("ROLE_ADMIN"))
+                .filter(u -> !u.getRole().equals("ROLE_ADMIN")) //Kullanıcılar admini topluluk listesinde göremiyor
                 .collect(java.util.stream.Collectors.toList());
 
-        model.addAttribute("users", normalUsers);
+        model.addAttribute("users", normalUsers); //adminleri çıkardığımız o kullanıcı listesini (normalUsers) alıyor ve kutunun üzerine "users" etiketini yapıştırarak HTML'e gönderiyor.
         model.addAttribute("currentUser", getLoggedInUser());
         model.addAttribute("title", "Koleksiyoncular Topluluğu");
         return "users";

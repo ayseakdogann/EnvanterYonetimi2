@@ -16,10 +16,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     // Bir ürüne gelen tüm teklifleri en yüksekten en düşüğe sıralar
     List<Bid> findByItemIdOrderByAmountDesc(Long itemId);
 
-    /**
-     * Kullanıcı silinirken ona ait tüm teklifleri silmek için kullanılır.
-     * Entity içindeki alan adı 'bidder' olduğu için b.bidder.id şeklinde güncellendi.
-     */
+    //Kullanıcı silinirken ona ait tüm teklifleri silmek için kullanılır
     @Modifying
     @Transactional
     @Query("DELETE FROM Bid b WHERE b.bidder.id = :userId")

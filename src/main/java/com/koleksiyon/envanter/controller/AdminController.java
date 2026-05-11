@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin")
-@RequiredArgsConstructor
+@RequiredArgsConstructor // final değişkenler için otomatik olarak constructor oluşturur
 public class AdminController {
 
     private final SystemVaultRepository systemVaultRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        SystemVault vault = systemVaultRepository.findById(1L).orElse(new SystemVault());
+        SystemVault vault = systemVaultRepository.findById(1L).orElse(new SystemVault()); //Eğer sistem yeni kurulmuşsa ve kasada henüz hiç kayıt yoksa (null dönecekse), sistemin çökmesini engeller ve geçici, içi boş yeni bir kasa nesnesi oluşturur.
         model.addAttribute("totalCommission", vault.getTotalCommission());
         return "admin-dashboard";
     }

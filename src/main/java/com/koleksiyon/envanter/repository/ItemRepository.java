@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     @EntityGraph(attributePaths = {"owner"})
     Optional<Item> findById(Long id);
+
     List<Item> findByNameContainingIgnoreCase(String name);
     //Veri tabanı seviyesinde listeleme yaparız
     List<Item> findByOwner(User owner);
