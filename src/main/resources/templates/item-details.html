@@ -150,9 +150,9 @@
                        onclick="return confirm('Bu ilanı sistemden kaldırmak istediğinize emin misiniz?')">
                         <i class="bi bi-trash-fill"></i> İlanı Sil
                     </a>
-                    <button class="btn btn-dark btn-sm px-3 rounded-pill disabled">
-                        <i class="bi bi-pencil-square"></i> İçeriği Düzenle
-                    </button>
+                    <a th:href="@{/items/edit/{id}(id=${item.id})}" class="btn btn-secondary btn-sm text-white">
+                        <i class="bi bi-pencil-square me-1"></i> İçeriği Düzenle
+                    </a>
                 </div>
             </div>
 
