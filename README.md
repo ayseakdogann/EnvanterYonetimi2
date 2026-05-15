@@ -51,7 +51,7 @@ mvn clean install
 Bu proje geliştirilmeye devam etmektedir. Gelecek güncellemelerde **LOB** (Large Object) desteği ile dosya/resim yükleme ve daha detaylı bir raporlama modülü eklenmesi planlanmaktadır.
 
 ### Küçük Bir Tavsiye
-Dosyayı ekledikten sonra projendeki ekran görüntülerinden birini (örneğin login veya ana sayfa) bir `img` klasörüne atıp README içine şu şekilde eklersen çok daha etkileyici durur:
+Dosyayı ekledikten sonra projendeki ekran görüntülerinden birini (örneğin login veya ana sayfa) bir `img` klasörüne atıp README içine şu şekilde eklersen çok daha etkileyici durur;
 `![Ana Sayfa Ekran Görüntüsü](img/screenshot.png)`
 
 Projene "Dashboard" gibi bir özellik eklemeyi düşünüyor musun, yoksa şu an temel CRUD işlemlerine mi odaklanıyorsun?
