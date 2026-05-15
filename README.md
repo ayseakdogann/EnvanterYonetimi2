@@ -55,3 +55,8 @@ Dosyayı ekledikten sonra projendeki ekran görüntülerinden birini (örneğin 
 `![Ana Sayfa Ekran Görüntüsü](img/screenshot.png)`
 
 Projene "Dashboard" gibi bir özellik eklemeyi düşünüyor musun, yoksa şu an temel CRUD işlemlerine mi odaklanıyorsun?
+
+Projeyi Yapan Kişiler:
+Ayşe Akdoğan
+Şevvalsu Aktaş
+Melih Ali Çağman
